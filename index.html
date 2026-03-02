@@ -229,7 +229,7 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
   <div class="result-area" id="resultArea">
     <div class="result-loading" id="loadingArea" style="display:none">
       <div class="spinner"></div>
-      <p>Memproses link...</p>
+      <p id="loadingText">Memproses link...</p>
     </div>
     <div id="resultContent"></div>
   </div>
@@ -503,11 +503,51 @@ function closeDash() {
   document.getElementById('dashOverlay').classList.remove('show');
 }
 
-// DOWNLOADER via Cobalt API
+// ─── DOWNLOADER ───────────────────────────────────────────────
+// Coba beberapa endpoint Cobalt secara berurutan
+const COBALT_ENDPOINTS = [
+  'https://api.cobalt.tools/',
+  'https://cobalt.tools/api/',
+  'https://co.wuk.sh/'
+];
+
+async function tryCobalt(endpoint, url) {
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      url,
+      videoQuality: 'max',
+      filenameStyle: 'pretty',
+      twitterGif: false,
+      tiktokH265: false
+    }),
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.json();
+}
+
+// API publik alternatif (RapidAPI style proxy / open instances)
+async function tryTikwm(url) {
+  // tikwm.com - API publik untuk TikTok tanpa watermark
+  const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const d = await res.json();
+  if (d.code !== 0) throw new Error(d.msg || 'Failed');
+  return d.data;
+}
+
 async function handleDownload() {
   const url = document.getElementById('videoUrl').value.trim();
   const btn = document.getElementById('btnDl');
   const loading = document.getElementById('loadingArea');
+  const loadingText = document.getElementById('loadingText');
   const result = document.getElementById('resultContent');
   const errEl = document.getElementById('errorMsg');
   const resArea = document.getElementById('resultArea');
@@ -521,57 +561,94 @@ async function handleDownload() {
   loading.style.display = 'block';
   result.innerHTML = '';
 
-  const isTiktok = url.includes('tiktok');
+  const isTiktok = url.includes('tiktok') || url.includes('vm.tiktok') || url.includes('vt.tiktok');
   const isIg = url.includes('instagram') || url.includes('instagr.am');
   const isYt = url.includes('youtube') || url.includes('youtu.be');
 
-  // Try Cobalt API first
   let success = false;
-  try {
-    const res = await fetch('https://api.cobalt.tools/', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Accept':'application/json'},
-      body: JSON.stringify({url, videoQuality:'max', filenameStyle:'pretty', twitterGif:false}),
-      signal: AbortSignal.timeout(8000)
-    });
-    if (res.ok) {
-      const data = await res.json();
-      loading.style.display = 'none';
-      if ((data.status==='stream'||data.status==='redirect'||data.status==='tunnel') && data.url) {
-        result.innerHTML = `
-          <div class="video-info">
-            <h3>✅ Video siap didownload!</h3>
-            <p>Klik tombol di bawah untuk menyimpan video</p>
-            <div class="dl-options">
-              <a class="dl-btn primary" href="${data.url}" target="_blank" download>⬇ Download Video</a>
-              <a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>
-            </div>
-          </div>`;
-        success = true;
-      } else if (data.status==='picker' && data.picker?.length) {
-        const items = data.picker.map((item,i)=>
-          `<a class="dl-btn primary" href="${item.url}" target="_blank" download>⬇ Media ${i+1}</a>`
-        ).join('');
-        result.innerHTML = `
-          <div class="video-info">
-            <h3>✅ ${data.picker.length} media ditemukan</h3>
-            <p>Pilih media yang ingin didownload</p>
-            <div class="dl-options">${items}</div>
-          </div>`;
-        success = true;
-      }
-    }
-  } catch(e) { /* fallthrough */ }
 
+  // ── 1. Coba tikwm.com untuk TikTok (sangat reliable) ──
+  if (isTiktok && !success) {
+    try {
+      loadingText.textContent = 'Mengambil video TikTok...';
+      const data = await tryTikwm(url);
+      loading.style.display = 'none';
+
+      const hdUrl = data.hdplay || data.play;
+      const noWmUrl = data.wmplay ? '' : ''; // wmplay = with watermark, play/hdplay = no watermark
+
+      let buttons = '';
+      if (hdUrl) {
+        buttons += `<a class="dl-btn primary" href="${hdUrl}" target="_blank" download="tiktok_hd.mp4">⬇ Download HD (No WM)</a>`;
+      }
+      if (data.play && data.play !== hdUrl) {
+        buttons += `<a class="dl-btn secondary" href="${data.play}" target="_blank" download="tiktok.mp4">⬇ Download SD (No WM)</a>`;
+      }
+      if (data.music) {
+        buttons += `<a class="dl-btn secondary" href="${data.music}" target="_blank" download="audio.mp3">🎵 Download Audio</a>`;
+      }
+      buttons += `<a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>`;
+
+      const title = data.title ? `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${data.title.substring(0,80)}</p>` : '';
+
+      result.innerHTML = `
+        <div class="video-info">
+          <h3>✅ Video TikTok siap didownload!</h3>
+          ${title}
+          <div class="dl-options">${buttons}</div>
+        </div>`;
+      success = true;
+    } catch(e) { /* fallthrough ke cobalt */ }
+  }
+
+  // ── 2. Coba Cobalt API (semua platform) ──
+  if (!success) {
+    for (const endpoint of COBALT_ENDPOINTS) {
+      try {
+        loadingText.textContent = `Mencoba server ${COBALT_ENDPOINTS.indexOf(endpoint)+1}...`;
+        const data = await tryCobalt(endpoint, url);
+
+        if ((data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel') && data.url) {
+          loading.style.display = 'none';
+          result.innerHTML = `
+            <div class="video-info">
+              <h3>✅ Video siap didownload!</h3>
+              <p>Klik tombol di bawah untuk menyimpan video</p>
+              <div class="dl-options">
+                <a class="dl-btn primary" href="${data.url}" target="_blank" download>⬇ Download Video</a>
+                <a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>
+              </div>
+            </div>`;
+          success = true;
+          break;
+        } else if (data.status === 'picker' && data.picker?.length) {
+          loading.style.display = 'none';
+          const items = data.picker.map((item, i) =>
+            `<a class="dl-btn primary" href="${item.url}" target="_blank" download>⬇ Media ${i+1}</a>`
+          ).join('');
+          result.innerHTML = `
+            <div class="video-info">
+              <h3>✅ ${data.picker.length} media ditemukan</h3>
+              <p>Pilih media yang ingin didownload</p>
+              <div class="dl-options">${items}</div>
+            </div>`;
+          success = true;
+          break;
+        }
+      } catch(e) { /* coba endpoint berikutnya */ }
+    }
+  }
+
+  // ── 3. Fallback ke layanan eksternal ──
   if (!success) {
     loading.style.display = 'none';
     showFallback(url, isTiktok, isIg, isYt);
   }
+
   btn.disabled = false;
 }
 
 function showFallback(url, isTiktok, isIg, isYt) {
-  // Smart redirect ke layanan yang paling cocok
   let services = '';
   if (isTiktok) {
     services = `
