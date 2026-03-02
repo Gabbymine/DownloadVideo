@@ -1,1280 +1,615 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaveVideo — Download Video TikTok & Instagram</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box
-        }
-
-        :root {
-            --bg: #09090f;
-            --s1: #0f0f18;
-            --s2: #16161f;
-            --border: #1f1f2e;
-            --pink: #ff2d78;
-            --purple: #7c3aed;
-            --cyan: #00d4ff;
-            --text: #e8e8f5;
-            --muted: #52526e;
-            --font: 'Plus Jakarta Sans', sans-serif;
-            --mono: 'JetBrains Mono', monospace;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font);
-            min-height: 100vh
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(ellipse at 30% 20%, rgba(124, 58, 237, 0.08) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 80%, rgba(255, 45, 120, 0.06) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0
-        }
-
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border);
-            background: rgba(9, 9, 15, 0.92);
-            backdrop-filter: blur(12px)
-        }
-
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 800;
-            letter-spacing: -0.04em
-        }
-
-        .logo span {
-            background: linear-gradient(135deg, var(--pink), var(--purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text
-        }
-
-        .dash-btn {
-            padding: 0.4rem 1rem;
-            background: none;
-            border: none;
-            border-radius: 6px;
-            font-family: var(--font);
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s
-        }
-
-        .dash-btn:hover {
-            border-color: var(--purple);
-            color: var(--text)
-        }
-
-        .hero {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            padding: 4rem 2rem 2rem
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(124, 58, 237, 0.1);
-            border: 1px solid rgba(124, 58, 237, 0.3);
-            color: #a78bfa;
-            padding: 0.35rem 1rem;
-            border-radius: 100px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem
-        }
-
-        .hero h1 {
-            font-size: clamp(2rem, 6vw, 3.8rem);
-            font-weight: 800;
-            line-height: 1.1;
-            letter-spacing: -0.03em;
-            margin-bottom: 1rem
-        }
-
-        .hero h1 span {
-            background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text
-        }
-
-        .hero p {
-            color: var(--muted);
-            font-size: 1rem;
-            max-width: 480px;
-            margin: 0 auto 2.5rem;
-            line-height: 1.6
-        }
-
-        .platforms {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 2.5rem
-        }
-
-        .pill {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.4rem 0.9rem;
-            background: var(--s1);
-            border: 1px solid var(--border);
-            border-radius: 100px;
-            font-size: 0.8rem;
-            font-weight: 600
-        }
-
-        .pill.tiktok {
-            border-color: rgba(0, 212, 255, 0.3);
-            color: var(--cyan)
-        }
-
-        .pill.ig {
-            border-color: rgba(255, 45, 120, 0.3);
-            color: var(--pink)
-        }
-
-        .pill.yt {
-            border-color: rgba(255, 100, 100, 0.3);
-            color: #ff6464
-        }
-
-        .input-card {
-            position: relative;
-            z-index: 1;
-            max-width: 640px;
-            margin: 0 auto 1.5rem;
-            background: var(--s1);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem
-        }
-
-        .input-row {
-            display: flex;
-            gap: 0.5rem
-        }
-
-        .url-input {
-            flex: 1;
-            background: var(--s2);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.85rem 1rem;
-            color: var(--text);
-            font-family: var(--font);
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s
-        }
-
-        .url-input:focus {
-            border-color: var(--purple)
-        }
-
-        .url-input::placeholder {
-            color: var(--muted)
-        }
-
-        .btn-dl {
-            padding: 0.85rem 1.5rem;
-            background: linear-gradient(135deg, var(--pink), var(--purple));
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-family: var(--font);
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            white-space: nowrap
-        }
-
-        .btn-dl:hover {
-            opacity: 0.88
-        }
-
-        .btn-dl:disabled {
-            opacity: 0.5;
-            cursor: not-allowed
-        }
-
-        .result-area {
-            margin-top: 1.2rem;
-            display: none
-        }
-
-        .result-area.show {
-            display: block
-        }
-
-        .spinner {
-            width: 28px;
-            height: 28px;
-            border: 2px solid var(--border);
-            border-top-color: var(--purple);
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            margin: 0 auto 0.5rem
-        }
-
-        .result-loading {
-            text-align: center;
-            padding: 1rem;
-            color: var(--muted);
-            font-size: 0.9rem
-        }
-
-        .video-info h3 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem
-        }
-
-        .video-info p {
-            font-size: 0.78rem;
-            color: var(--muted);
-            margin-bottom: 0.75rem
-        }
-
-        .dl-options {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap
-        }
-
-        .dl-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            text-decoration: none
-        }
-
-        .dl-btn.primary {
-            background: linear-gradient(135deg, var(--pink), var(--purple));
-            color: #fff
-        }
-
-        .dl-btn.secondary {
-            background: var(--s2);
-            border: 1px solid var(--border);
-            color: var(--text)
-        }
-
-        .dl-btn:hover {
-            opacity: 0.85;
-            transform: translateY(-1px)
-        }
-
-        .error-msg {
-            background: rgba(255, 100, 100, 0.08);
-            border: 1px solid rgba(255, 100, 100, 0.2);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            font-size: 0.85rem;
-            color: #ff8080;
-            margin-top: 0.75rem;
-            display: none
-        }
-
-        .error-msg.show {
-            display: block
-        }
-
-        .how-section {
-            position: relative;
-            z-index: 1;
-            max-width: 640px;
-            margin: 0 auto 4rem;
-            padding: 0 2rem
-        }
-
-        .how-title {
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            margin-bottom: 1.5rem
-        }
-
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem
-        }
-
-        .step {
-            background: var(--s1);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.2rem;
-            text-align: center
-        }
-
-        .step-num {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--pink), var(--purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.9rem;
-            margin: 0 auto 0.75rem
-        }
-
-        .step h4 {
-            font-size: 0.85rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem
-        }
-
-        .step p {
-            font-size: 0.75rem;
-            color: var(--muted);
-            line-height: 1.5
-        }
-
-        /* PASSWORD MODAL */
-        .pw-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 200;
-            align-items: center;
-            justify-content: center
-        }
-
-        .pw-overlay.show {
-            display: flex
-        }
-
-        .pw-card {
-            background: var(--s1);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2rem;
-            width: min(380px, 90vw);
-            text-align: center
-        }
-
-        .pw-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem
-        }
-
-        .pw-title {
-            font-size: 1.2rem;
-            font-weight: 800;
-            margin-bottom: 0.4rem
-        }
-
-        .pw-subtitle {
-            color: var(--muted);
-            font-size: 0.85rem;
-            margin-bottom: 1.5rem
-        }
-
-        .pw-input {
-            width: 100%;
-            background: var(--s2);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.85rem 1rem;
-            color: var(--text);
-            font-family: var(--mono);
-            font-size: 1.1rem;
-            outline: none;
-            text-align: center;
-            letter-spacing: 0.25em;
-            transition: border-color 0.2s;
-            margin-bottom: 0.75rem
-        }
-
-        .pw-input:focus {
-            border-color: var(--purple)
-        }
-
-        .pw-input.shake {
-            animation: shake 0.4s ease;
-            border-color: var(--pink)
-        }
-
-        .pw-btn {
-            width: 100%;
-            padding: 0.85rem;
-            background: linear-gradient(135deg, var(--pink), var(--purple));
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-family: var(--font);
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: opacity 0.2s
-        }
-
-        .pw-btn:hover {
-            opacity: 0.88
-        }
-
-        .pw-cancel {
-            margin-top: 0.75rem;
-            background: none;
-            border: none;
-            color: var(--muted);
-            font-family: var(--font);
-            font-size: 0.85rem;
-            cursor: pointer
-        }
-
-        .pw-cancel:hover {
-            color: var(--text)
-        }
-
-        .pw-err {
-            color: var(--pink);
-            font-size: 0.8rem;
-            margin-bottom: 0.75rem;
-            min-height: 1.2rem
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0)
-            }
-
-            25% {
-                transform: translateX(-8px)
-            }
-
-            75% {
-                transform: translateX(8px)
-            }
-        }
-
-        /* DASHBOARD */
-        .dash-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: var(--bg);
-            z-index: 100;
-            overflow-y: auto
-        }
-
-        .dash-overlay.show {
-            display: block
-        }
-
-        .dash-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2rem
-        }
-
-        .dash-topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem
-        }
-
-        .dash-logo {
-            font-size: 1.3rem;
-            font-weight: 800
-        }
-
-        .dash-logo span {
-            color: var(--purple)
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: #00e676;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-            animation: pulse 1.5s infinite
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: 0.4
-            }
-        }
-
-        .btn-close-dash {
-            padding: 0.5rem 1.2rem;
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            border-radius: 8px;
-            font-family: var(--font);
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s
-        }
-
-        .btn-close-dash:hover {
-            border-color: var(--pink);
-            color: var(--pink)
-        }
-
-        .btn-clear {
-            padding: 0.45rem 0.9rem;
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            border-radius: 6px;
-            font-family: var(--font);
-            font-size: 0.78rem;
-            cursor: pointer;
-            transition: all 0.2s
-        }
-
-        .btn-clear:hover {
-            border-color: #ff5252;
-            color: #ff5252
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1.5rem
-        }
-
-        .stat-card {
-            background: var(--s1);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem
-        }
-
-        .stat-lbl {
-            font-size: 0.68rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.4rem;
-            font-family: var(--mono)
-        }
-
-        .stat-val {
-            font-size: 1.8rem;
-            font-weight: 800;
-            line-height: 1
-        }
-
-        .cg {
-            color: #00e676
-        }
-
-        .cb {
-            color: #448aff
-        }
-
-        .co {
-            color: #ff9100
-        }
-
-        .cp {
-            color: var(--pink)
-        }
-
-        .vtable {
-            background: var(--s1);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden
-        }
-
-        .thead {
-            display: grid;
-            grid-template-columns: 40px 145px 1fr 1fr 90px 120px;
-            gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            background: var(--s2);
-            border-bottom: 1px solid var(--border);
-            font-size: 0.68rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-family: var(--mono)
-        }
-
-        .vrow {
-            display: grid;
-            grid-template-columns: 40px 145px 1fr 1fr 90px 120px;
-            gap: 0.5rem;
-            padding: 0.8rem 1rem;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.82rem;
-            transition: background 0.15s;
-            align-items: center;
-            cursor: pointer
-        }
-
-        .vrow:last-child {
-            border-bottom: none
-        }
-
-        .vrow:hover {
-            background: var(--s2)
-        }
-
-        .vnum {
-            color: var(--muted);
-            font-family: var(--mono);
-            font-size: 0.72rem
-        }
-
-        .ip-tag {
-            font-family: var(--mono);
-            font-size: 0.75rem;
-            background: rgba(68, 138, 255, 0.1);
-            color: #448aff;
-            padding: 2px 7px;
-            border-radius: 4px;
-            display: inline-block
-        }
-
-        .new-tag {
-            background: rgba(0, 230, 118, 0.15);
-            color: #00e676;
-            font-size: 0.62rem;
-            padding: 1px 5px;
-            border-radius: 3px;
-            margin-left: 3px;
-            font-family: var(--mono)
-        }
-
-        .gps-tag {
-            background: rgba(255, 45, 120, 0.15);
-            color: var(--pink);
-            font-size: 0.62rem;
-            padding: 1px 5px;
-            border-radius: 3px;
-            margin-left: 3px;
-            font-family: var(--mono)
-        }
-
-        .ttime {
-            color: var(--muted);
-            font-size: 0.73rem;
-            font-family: var(--mono)
-        }
-
-        .empty {
-            padding: 3rem;
-            text-align: center;
-            color: var(--muted)
-        }
-
-        /* DETAIL MODAL */
-        .modal-ov {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(6px);
-            z-index: 300;
-            align-items: center;
-            justify-content: center
-        }
-
-        .modal-ov.show {
-            display: flex
-        }
-
-        .modal-box {
-            background: var(--s1);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 1.5rem;
-            width: min(560px, 92vw);
-            max-height: 85vh;
-            overflow-y: auto
-        }
-
-        .modal-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem
-        }
-
-        .modal-ttl {
-            font-size: 1rem;
-            font-weight: 700
-        }
-
-        .modal-x {
-            background: none;
-            border: none;
-            color: var(--muted);
-            font-size: 1.2rem;
-            cursor: pointer
-        }
-
-        .modal-x:hover {
-            color: var(--text)
-        }
-
-        .dgrid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.55rem
-        }
-
-        .ditem {
-            background: var(--s2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem
-        }
-
-        .ditem.full {
-            grid-column: 1/-1
-        }
-
-        .dlbl {
-            font-size: 0.63rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.3rem;
-            font-family: var(--mono)
-        }
-
-        .dval {
-            font-size: 0.84rem;
-            word-break: break-all
-        }
-
-        .dval.accent {
-            color: #00e676
-        }
-
-        .dval.mono {
-            font-family: var(--mono);
-            font-size: 0.78rem
-        }
-
-        .dval.pink {
-            color: var(--pink)
-        }
-
-        .maps-a {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            color: #448aff;
-            font-size: 0.78rem;
-            text-decoration: none;
-            margin-top: 0.4rem
-        }
-
-        .maps-a:hover {
-            text-decoration: underline
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg)
-            }
-        }
-
-        @media(max-width:650px) {
-            .stats-row {
-                grid-template-columns: 1fr 1fr
-            }
-
-            .thead,
-            .vrow {
-                grid-template-columns: 30px 1fr 1fr 80px
-            }
-
-            .col-isp,
-            .col-dev {
-                display: none
-            }
-
-            .steps {
-                grid-template-columns: 1fr
-            }
-
-            nav {
-                padding: 0.75rem 1rem
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaveVideo — Download Video TikTok & Instagram</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#09090f;--s1:#0f0f18;--s2:#16161f;--border:#1f1f2e;
+  --pink:#ff2d78;--purple:#7c3aed;--cyan:#00d4ff;
+  --text:#e8e8f5;--muted:#52526e;
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 30% 20%,rgba(124,58,237,0.08) 0%,transparent 55%),
+             radial-gradient(ellipse at 80% 80%,rgba(255,45,120,0.06) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+
+nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;
+  padding:1rem 2rem;border-bottom:1px solid var(--border);
+  background:rgba(9,9,15,0.92);backdrop-filter:blur(12px)}
+.logo{font-size:1.2rem;font-weight:800;letter-spacing:-0.04em}
+.logo span{background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.dash-btn{padding:0.4rem 1rem;background:none;border:none;
+  border-radius:6px;font-family:var(--font);font-size:0.8rem;cursor:pointer;transition:all 0.2s}
+.dash-btn:hover{border-color:var(--purple);color:var(--text)}
+
+.hero{position:relative;z-index:1;text-align:center;padding:4rem 2rem 2rem}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;
+  background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);
+  color:#a78bfa;padding:0.35rem 1rem;border-radius:100px;font-size:0.78rem;font-weight:600;margin-bottom:1.5rem}
+.hero h1{font-size:clamp(2rem,6vw,3.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.03em;margin-bottom:1rem}
+.hero h1 span{background:linear-gradient(135deg,var(--pink) 0%,var(--purple) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--muted);font-size:1rem;max-width:480px;margin:0 auto 2.5rem;line-height:1.6}
+
+.platforms{display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.pill{display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.9rem;
+  background:var(--s1);border:1px solid var(--border);border-radius:100px;font-size:0.8rem;font-weight:600}
+.pill.tiktok{border-color:rgba(0,212,255,0.3);color:var(--cyan)}
+.pill.ig{border-color:rgba(255,45,120,0.3);color:var(--pink)}
+.pill.yt{border-color:rgba(255,100,100,0.3);color:#ff6464}
+
+.input-card{position:relative;z-index:1;max-width:640px;margin:0 auto 1.5rem;
+  background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
+.input-row{display:flex;gap:0.5rem}
+.url-input{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:0.85rem 1rem;color:var(--text);font-family:var(--font);font-size:0.9rem;outline:none;transition:border-color 0.2s}
+.url-input:focus{border-color:var(--purple)}
+.url-input::placeholder{color:var(--muted)}
+.btn-dl{padding:0.85rem 1.5rem;background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#fff;border:none;border-radius:10px;font-family:var(--font);font-weight:700;
+  font-size:0.9rem;cursor:pointer;transition:opacity 0.2s;white-space:nowrap}
+.btn-dl:hover{opacity:0.88}
+.btn-dl:disabled{opacity:0.5;cursor:not-allowed}
+
+.result-area{margin-top:1.2rem;display:none}
+.result-area.show{display:block}
+.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--purple);
+  border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 0.5rem}
+.result-loading{text-align:center;padding:1rem;color:var(--muted);font-size:0.9rem}
+
+.video-info h3{font-size:0.95rem;font-weight:700;margin-bottom:0.3rem}
+.video-info p{font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem}
+.dl-options{display:flex;gap:0.5rem;flex-wrap:wrap}
+.dl-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;
+  border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none}
+.dl-btn.primary{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff}
+.dl-btn.secondary{background:var(--s2);border:1px solid var(--border);color:var(--text)}
+.dl-btn:hover{opacity:0.85;transform:translateY(-1px)}
+
+.error-msg{background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.2);
+  border-radius:8px;padding:0.75rem 1rem;font-size:0.85rem;color:#ff8080;margin-top:0.75rem;display:none}
+.error-msg.show{display:block}
+
+.how-section{position:relative;z-index:1;max-width:640px;margin:0 auto 4rem;padding:0 2rem}
+.how-title{text-align:center;font-size:0.85rem;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.12em;margin-bottom:1.5rem}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.step{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center}
+.step-num{width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.9rem;margin:0 auto 0.75rem}
+.step h4{font-size:0.85rem;font-weight:700;margin-bottom:0.3rem}
+.step p{font-size:0.75rem;color:var(--muted);line-height:1.5}
+
+/* PASSWORD MODAL */
+.pw-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center}
+.pw-overlay.show{display:flex}
+.pw-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;
+  padding:2rem;width:min(380px,90vw);text-align:center}
+.pw-icon{font-size:2.5rem;margin-bottom:1rem}
+.pw-title{font-size:1.2rem;font-weight:800;margin-bottom:0.4rem}
+.pw-subtitle{color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem}
+.pw-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;
+  padding:0.85rem 1rem;color:var(--text);font-family:var(--mono);font-size:1.1rem;
+  outline:none;text-align:center;letter-spacing:0.25em;transition:border-color 0.2s;margin-bottom:0.75rem}
+.pw-input:focus{border-color:var(--purple)}
+.pw-input.shake{animation:shake 0.4s ease;border-color:var(--pink)}
+.pw-btn{width:100%;padding:0.85rem;background:linear-gradient(135deg,var(--pink),var(--purple));
+  color:#fff;border:none;border-radius:10px;font-family:var(--font);font-weight:700;
+  font-size:0.95rem;cursor:pointer;transition:opacity 0.2s}
+.pw-btn:hover{opacity:0.88}
+.pw-cancel{margin-top:0.75rem;background:none;border:none;color:var(--muted);
+  font-family:var(--font);font-size:0.85rem;cursor:pointer}
+.pw-cancel:hover{color:var(--text)}
+.pw-err{color:var(--pink);font-size:0.8rem;margin-bottom:0.75rem;min-height:1.2rem}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* DASHBOARD */
+.dash-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto}
+.dash-overlay.show{display:block}
+.dash-inner{max-width:1100px;margin:0 auto;padding:2rem}
+.dash-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.dash-logo{font-size:1.3rem;font-weight:800}
+.dash-logo span{color:var(--purple)}
+.live-dot{width:8px;height:8px;background:#00e676;border-radius:50%;display:inline-block;margin-right:6px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.btn-close-dash{padding:0.5rem 1.2rem;background:none;border:1px solid var(--border);
+  color:var(--muted);border-radius:8px;font-family:var(--font);font-size:0.85rem;cursor:pointer;transition:all 0.2s}
+.btn-close-dash:hover{border-color:var(--pink);color:var(--pink)}
+.btn-clear{padding:0.45rem 0.9rem;background:none;border:1px solid var(--border);
+  color:var(--muted);border-radius:6px;font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all 0.2s}
+.btn-clear:hover{border-color:#ff5252;color:#ff5252}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.5rem}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1rem}
+.stat-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem;font-family:var(--mono)}
+.stat-val{font-size:1.8rem;font-weight:800;line-height:1}
+.cg{color:#00e676}.cb{color:#448aff}.co{color:#ff9100}.cp{color:var(--pink)}
+
+.vtable{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.thead{display:grid;grid-template-columns:40px 145px 1fr 1fr 90px 120px;gap:0.5rem;
+  padding:0.75rem 1rem;background:var(--s2);border-bottom:1px solid var(--border);
+  font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--mono)}
+.vrow{display:grid;grid-template-columns:40px 145px 1fr 1fr 90px 120px;gap:0.5rem;
+  padding:0.8rem 1rem;border-bottom:1px solid var(--border);font-size:0.82rem;
+  transition:background 0.15s;align-items:center;cursor:pointer}
+.vrow:last-child{border-bottom:none}
+.vrow:hover{background:var(--s2)}
+.vnum{color:var(--muted);font-family:var(--mono);font-size:0.72rem}
+.ip-tag{font-family:var(--mono);font-size:0.75rem;background:rgba(68,138,255,0.1);
+  color:#448aff;padding:2px 7px;border-radius:4px;display:inline-block}
+.new-tag{background:rgba(0,230,118,0.15);color:#00e676;font-size:0.62rem;padding:1px 5px;border-radius:3px;margin-left:3px;font-family:var(--mono)}
+.gps-tag{background:rgba(255,45,120,0.15);color:var(--pink);font-size:0.62rem;padding:1px 5px;border-radius:3px;margin-left:3px;font-family:var(--mono)}
+.ttime{color:var(--muted);font-size:0.73rem;font-family:var(--mono)}
+.empty{padding:3rem;text-align:center;color:var(--muted)}
+
+/* DETAIL MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(6px);z-index:300;align-items:center;justify-content:center}
+.modal-ov.show{display:flex}
+.modal-box{background:var(--s1);border:1px solid var(--border);border-radius:18px;
+  padding:1.5rem;width:min(560px,92vw);max-height:85vh;overflow-y:auto}
+.modal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.modal-ttl{font-size:1rem;font-weight:700}
+.modal-x{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer}
+.modal-x:hover{color:var(--text)}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem}
+.ditem{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:0.75rem}
+.ditem.full{grid-column:1/-1}
+.dlbl{font-size:0.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem;font-family:var(--mono)}
+.dval{font-size:0.84rem;word-break:break-all}
+.dval.accent{color:#00e676}
+.dval.mono{font-family:var(--mono);font-size:0.78rem}
+.dval.pink{color:var(--pink)}
+.maps-a{display:inline-flex;align-items:center;gap:0.4rem;color:#448aff;font-size:0.78rem;text-decoration:none;margin-top:0.4rem}
+.maps-a:hover{text-decoration:underline}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:650px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .thead,.vrow{grid-template-columns:30px 1fr 1fr 80px}
+  .col-isp,.col-dev{display:none}
+  .steps{grid-template-columns:1fr}
+  nav{padding:0.75rem 1rem}
+  .hero{padding:2rem 1rem 1.5rem}
+  .hero h1{font-size:2rem}
+  .hero p{font-size:0.9rem}
+  .input-card{margin:0 1rem 1.5rem;padding:1rem}
+  .input-row{flex-direction:column}
+  .btn-dl{width:100%;justify-content:center}
+  .url-input{width:100%;font-size:16px}
+  .dl-options{flex-direction:column}
+  .dl-btn{width:100%;justify-content:center}
+  .how-section{padding:0 1rem}
+  .dgrid{grid-template-columns:1fr}
+  .ditem.full{grid-column:1}
+  .dash-inner{padding:1rem}
+  .pw-card{padding:1.5rem}
+}
+@media(max-width:650px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .thead,.vrow{grid-template-columns:30px 1fr 1fr 80px}
+  .col-isp,.col-dev{display:none}
+  .steps{grid-template-columns:1fr}
+  nav{padding:0.75rem 1rem}
+}
+</style>
 </head>
-
 <body>
 
-    <nav>
-        <div class="logo">Download<span>Video</span></div>
-        <button class="dash-btn" onclick="openDash()"></button>
-    </nav>
+<nav>
+  <div class="logo">Save<span>Video</span></div>
+  <button class="dash-btn" onclick="openDash()"></button>
+</nav>
 
-    <div class="hero">
-        <div class="hero-badge">⚡ Gratis & Tanpa Watermark</div>
-        <h1>Download Video<br><span>TikTok & Instagram</span></h1>
-        <p>Simpan video favorit kamu tanpa watermark langsung ke perangkat. Cepat, gratis, dan mudah digunakan.</p>
-        <div class="platforms">
-            <div class="pill tiktok">🎵 TikTok</div>
-            <div class="pill ig">📸 Instagram</div>
-            <div class="pill yt">▶️ YouTube</div>
-        </div>
+<div class="hero">
+  <div class="hero-badge">⚡ Gratis & Tanpa Watermark</div>
+  <h1>Download Video<br><span>TikTok & Instagram</span></h1>
+  <p>Simpan video favorit kamu tanpa watermark langsung ke perangkat. Cepat, gratis, dan mudah digunakan.</p>
+  <div class="platforms">
+    <div class="pill tiktok">🎵 TikTok</div>
+    <div class="pill ig">📸 Instagram</div>
+    <div class="pill yt">▶️ YouTube</div>
+  </div>
+</div>
+
+<div class="input-card">
+  <div class="input-row">
+    <input class="url-input" id="videoUrl" placeholder="Paste link TikTok / Instagram / YouTube di sini...">
+    <button class="btn-dl" id="btnDl" onclick="handleDownload()">Download</button>
+  </div>
+  <div class="result-area" id="resultArea">
+    <div class="result-loading" id="loadingArea" style="display:none">
+      <div class="spinner"></div>
+      <p>Memproses link...</p>
     </div>
+    <div id="resultContent"></div>
+  </div>
+  <div class="error-msg" id="errorMsg"></div>
+</div>
 
-    <div class="input-card">
-        <div class="input-row">
-            <input class="url-input" id="videoUrl" placeholder="Paste link TikTok / Instagram / YouTube di sini...">
-            <button class="btn-dl" id="btnDl" onclick="handleDownload()">Download</button>
+<div class="how-section">
+  <div class="how-title">Cara Penggunaan</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><h4>Copy Link</h4><p>Salin link video dari TikTok atau Instagram</p></div>
+    <div class="step"><div class="step-num">2</div><h4>Paste & Download</h4><p>Tempel link di kotak di atas, klik Download</p></div>
+    <div class="step"><div class="step-num">3</div><h4>Simpan Video</h4><p>Pilih kualitas dan simpan ke perangkatmu</p></div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-overlay" id="pwOverlay">
+  <div class="pw-card">
+    <div class="pw-icon">🔐</div>
+    <div class="pw-title">Admin Dashboard</div>
+    <div class="pw-subtitle">Masukkan password untuk mengakses panel admin</div>
+    <input class="pw-input" id="pwInput" type="password" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')checkPw()">
+    <div class="pw-err" id="pwErr"></div>
+    <button class="pw-btn" onclick="checkPw()">Masuk</button>
+    <br>
+    <button class="pw-cancel" onclick="closePw()">Batal</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dash-overlay" id="dashOverlay">
+  <div class="dash-inner">
+    <div class="dash-topbar">
+      <div>
+        <div class="dash-logo">Save<span>Vid</span> — Visitor Dashboard</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem">
+          <span class="live-dot"></span>Realtime via Firebase
         </div>
-        <div class="result-area" id="resultArea">
-            <div class="result-loading" id="loadingArea" style="display:none">
-                <div class="spinner"></div>
-                <p>Memproses link...</p>
-            </div>
-            <div id="resultContent"></div>
-        </div>
-        <div class="error-msg" id="errorMsg"></div>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn-clear" onclick="clearAll()">Clear Data</button>
+        <button class="btn-close-dash" onclick="closeDash()">Tutup</button>
+      </div>
     </div>
-
-    <div class="how-section">
-        <div class="how-title">Cara Penggunaan</div>
-        <div class="steps">
-            <div class="step">
-                <div class="step-num">1</div>
-                <h4>Copy Link</h4>
-                <p>Salin link video dari TikTok atau Instagram</p>
-            </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <h4>Paste & Download</h4>
-                <p>Tempel link di kotak di atas, klik Download</p>
-            </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <h4>Simpan Video</h4>
-                <p>Pilih kualitas dan simpan ke perangkatmu</p>
-            </div>
-        </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-lbl">Total Visitor</div><div class="stat-val cg" id="st-total">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">IP Unik</div><div class="stat-val cb" id="st-unique">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">Negara</div><div class="stat-val" id="st-country">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">GPS Granted</div><div class="stat-val cp" id="st-gps">0</div></div>
     </div>
-
-    <!-- PASSWORD MODAL -->
-    <div class="pw-overlay" id="pwOverlay">
-        <div class="pw-card">
-            <div class="pw-icon">🔐</div>
-            <div class="pw-title">Admin Dashboard</div>
-            <div class="pw-subtitle">Masukkan password untuk mengakses panel admin</div>
-            <input class="pw-input" id="pwInput" type="password" placeholder="••••••••"
-                onkeydown="if(event.key==='Enter')checkPw()">
-            <div class="pw-err" id="pwErr"></div>
-            <button class="pw-btn" onclick="checkPw()">Masuk</button>
-            <br>
-            <button class="pw-cancel" onclick="closePw()">Batal</button>
-        </div>
+    <div class="vtable">
+      <div class="thead">
+        <div>#</div><div>IP Address</div><div>Lokasi</div>
+        <div class="col-isp">ISP</div><div class="col-dev">Device</div><div>Waktu</div>
+      </div>
+      <div id="visitorList"><div class="empty">⏳ Menunggu data dari Firebase...</div></div>
     </div>
+  </div>
+</div>
 
-    <!-- DASHBOARD -->
-    <div class="dash-overlay" id="dashOverlay">
-        <div class="dash-inner">
-            <div class="dash-topbar">
-                <div>
-                    <div class="dash-logo">Fauzan<span>Track</span></div>
-                    <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem">
-                        <span class="live-dot"></span>Realtime via Firebase
-                    </div>
-                </div>
-                <div style="display:flex;gap:0.5rem">
-                    <button class="btn-clear" onclick="clearAll()">Clear Data</button>
-                    <button class="btn-close-dash" onclick="closeDash()">Tutup</button>
-                </div>
-            </div>
-            <div class="stats-row">
-                <div class="stat-card">
-                    <div class="stat-lbl">Total Visitor</div>
-                    <div class="stat-val cg" id="st-total">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-lbl">IP Unik</div>
-                    <div class="stat-val cb" id="st-unique">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-lbl">Negara</div>
-                    <div class="stat-val" id="st-country">—</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-lbl">GPS Granted</div>
-                    <div class="stat-val cp" id="st-gps">0</div>
-                </div>
-            </div>
-            <div class="vtable">
-                <div class="thead">
-                    <div>#</div>
-                    <div>IP Address</div>
-                    <div>Lokasi</div>
-                    <div class="col-isp">ISP</div>
-                    <div class="col-dev">Device</div>
-                    <div>Waktu</div>
-                </div>
-                <div id="visitorList">
-                    <div class="empty">⏳ Menunggu data dari Firebase...</div>
-                </div>
-            </div>
-        </div>
+<!-- DETAIL MODAL -->
+<div class="modal-ov" id="detailModal">
+  <div class="modal-box">
+    <div class="modal-top">
+      <div class="modal-ttl">Detail Visitor</div>
+      <button class="modal-x" onclick="closeDetail()">✕</button>
     </div>
+    <div class="dgrid" id="detailContent"></div>
+  </div>
+</div>
 
-    <!-- DETAIL MODAL -->
-    <div class="modal-ov" id="detailModal">
-        <div class="modal-box">
-            <div class="modal-top">
-                <div class="modal-ttl">Detail Visitor</div>
-                <button class="modal-x" onclick="closeDetail()">✕</button>
-            </div>
-            <div class="dgrid" id="detailContent"></div>
-        </div>
-    </div>
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    <!-- FIREBASE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBeE44QfFV9faVxx4c40-Uz8ph-ftVdsSQ",
+  authDomain: "nettrack-768ac.firebaseapp.com",
+  databaseURL: "https://nettrack-768ac-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nettrack-768ac",
+  storageBucket: "nettrack-768ac.firebasestorage.app",
+  messagingSenderId: "776013517926",
+  appId: "1:776013517926:web:80e7bbcd96afb5c65f89a7"
+};
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBeE44QfFV9faVxx4c40-Uz8ph-ftVdsSQ",
-            authDomain: "nettrack-768ac.firebaseapp.com",
-            databaseURL: "https://nettrack-768ac-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "nettrack-768ac",
-            storageBucket: "nettrack-768ac.firebasestorage.app",
-            messagingSenderId: "776013517926",
-            appId: "1:776013517926:web:80e7bbcd96afb5c65f89a7"
-        };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const visRef = ref(db, 'visitors');
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const visRef = ref(db, 'visitors');
+async function collect() {
+  const ua = navigator.userAgent.toLowerCase();
+  const entry = {
+    timestamp: new Date().toISOString(),
+    ua: navigator.userAgent,
+    platform: navigator.platform || 'N/A',
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    screen: `${screen.width}x${screen.height}`,
+    deviceType: /mobile|android|iphone|ipad/.test(ua) ? 'Mobile' : /tablet/.test(ua) ? 'Tablet' : 'Desktop',
+    ip: null, city: null, region: null, country: null,
+    country_code: null, org: null, asn: null,
+    lat: null, lng: null, gps_lat: null, gps_lng: null,
+    gps_accuracy: null, gps_status: 'pending', postal: null, connection: null
+  };
 
-        async function collect() {
-            const ua = navigator.userAgent.toLowerCase();
-            const entry = {
-                timestamp: new Date().toISOString(),
-                ua: navigator.userAgent,
-                platform: navigator.platform || 'N/A',
-                language: navigator.language,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                screen: `${screen.width}x${screen.height}`,
-                deviceType: /mobile|android|iphone|ipad/.test(ua) ? 'Mobile' : /tablet/.test(ua) ? 'Tablet' : 'Desktop',
-                ip: null, city: null, region: null, country: null,
-                country_code: null, org: null, asn: null,
-                lat: null, lng: null, gps_lat: null, gps_lng: null,
-                gps_accuracy: null, gps_status: 'pending', postal: null, connection: null
-            };
+  const conn = navigator.connection || navigator.mozConnection;
+  if (conn) entry.connection = `${conn.effectiveType||'?'}/${conn.downlink||'?'}Mbps`;
 
-            const conn = navigator.connection || navigator.mozConnection;
-            if (conn) entry.connection = `${conn.effectiveType || '?'}/${conn.downlink || '?'}Mbps`;
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    const d = await r.json();
+    Object.assign(entry, {
+      ip:d.ip, city:d.city, region:d.region, country:d.country_name,
+      country_code:d.country_code, org:d.org, asn:d.asn,
+      lat:d.latitude, lng:d.longitude, postal:d.postal
+    });
+  } catch(e) { entry.ip = 'fetch-failed'; }
 
-            try {
-                const r = await fetch('https://ipapi.co/json/');
-                const d = await r.json();
-                Object.assign(entry, {
-                    ip: d.ip, city: d.city, region: d.region, country: d.country_name,
-                    country_code: d.country_code, org: d.org, asn: d.asn,
-                    lat: d.latitude, lng: d.longitude, postal: d.postal
-                });
-            } catch (e) { entry.ip = 'fetch-failed'; }
+  let savedKey = null;
+  try {
+    const res = await push(visRef, entry);
+    savedKey = res.key;
+  } catch(e) { return; }
 
-            let savedKey = null;
-            try {
-                const res = await push(visRef, entry);
-                savedKey = res.key;
-            } catch (e) { return; }
-
-            if (navigator.geolocation && savedKey) {
-                navigator.geolocation.getCurrentPosition(
-                    async pos => {
-                        const { latitude: gla, longitude: glo, accuracy: acc } = pos.coords;
-                        await update(ref(db, `visitors/${savedKey}`), {
-                            gps_lat: gla, gps_lng: glo, gps_accuracy: Math.round(acc),
-                            gps_status: 'granted', lat: gla, lng: glo
-                        });
-                    },
-                    async err => {
-                        await update(ref(db, `visitors/${savedKey}`), {
-                            gps_status: err.code === 1 ? 'denied' : 'unavailable'
-                        });
-                    },
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-                );
-            }
-        }
-
-        let allVisitors = [];
-        onValue(visRef, snap => {
-            allVisitors = [];
-            if (snap.exists()) snap.forEach(c => allVisitors.unshift({ _key: c.key, ...c.val() }));
-            if (document.getElementById('dashOverlay').classList.contains('show')) window.renderDash();
+  if (navigator.geolocation && savedKey) {
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const {latitude:gla, longitude:glo, accuracy:acc} = pos.coords;
+        await update(ref(db, `visitors/${savedKey}`), {
+          gps_lat:gla, gps_lng:glo, gps_accuracy:Math.round(acc),
+          gps_status:'granted', lat:gla, lng:glo
         });
+      },
+      async err => {
+        await update(ref(db, `visitors/${savedKey}`), {
+          gps_status: err.code===1 ? 'denied' : 'unavailable'
+        });
+      },
+      {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+    );
+  }
+}
 
-        window.renderDash = function () {
-            const v = allVisitors;
-            document.getElementById('st-total').textContent = v.length;
-            document.getElementById('st-unique').textContent = new Set(v.map(x => x.ip).filter(Boolean)).size;
-            document.getElementById('st-country').textContent = new Set(v.map(x => x.country_code).filter(Boolean)).size || '—';
-            document.getElementById('st-gps').textContent = v.filter(x => x.gps_status === 'granted').length;
+let allVisitors = [];
+onValue(visRef, snap => {
+  allVisitors = [];
+  if (snap.exists()) snap.forEach(c => allVisitors.unshift({_key:c.key, ...c.val()}));
+  if (document.getElementById('dashOverlay').classList.contains('show')) window.renderDash();
+});
 
-            const list = document.getElementById('visitorList');
-            if (!v.length) { list.innerHTML = '<div class="empty">📭 Belum ada visitor. Share linknya!</div>'; return; }
+window.renderDash = function() {
+  const v = allVisitors;
+  document.getElementById('st-total').textContent = v.length;
+  document.getElementById('st-unique').textContent = new Set(v.map(x=>x.ip).filter(Boolean)).size;
+  document.getElementById('st-country').textContent = new Set(v.map(x=>x.country_code).filter(Boolean)).size || '—';
+  document.getElementById('st-gps').textContent = v.filter(x=>x.gps_status==='granted').length;
 
-            const now = Date.now();
-            list.innerHTML = v.map((vis, i) => {
-                const flag = vis.country_code ? cf(vis.country_code) + ' ' : '';
-                const loc = vis.city ? `${flag}${vis.city}, ${vis.region || ''}` : `${flag}${vis.country || 'Unknown'}`;
-                const dev = vis.deviceType === 'Mobile' ? '📱' : vis.deviceType === 'Tablet' ? '📟' : '🖥️';
-                const time = new Date(vis.timestamp).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                const isNew = (now - new Date(vis.timestamp).getTime()) < 60000;
-                const hasGps = vis.gps_status === 'granted';
-                return `<div class="vrow" onclick="window.showDetail('${vis._key}')">
-      <div class="vnum">${v.length - i}</div>
-      <div><span class="ip-tag">${(vis.ip || 'N/A').substring(0, 16)}</span>${isNew ? '<span class="new-tag">NEW</span>' : ''}${hasGps ? '<span class="gps-tag">GPS✓</span>' : ''}</div>
+  const list = document.getElementById('visitorList');
+  if (!v.length) { list.innerHTML = '<div class="empty">📭 Belum ada visitor. Share linknya!</div>'; return; }
+
+  const now = Date.now();
+  list.innerHTML = v.map((vis,i) => {
+    const flag = vis.country_code ? cf(vis.country_code)+' ' : '';
+    const loc = vis.city ? `${flag}${vis.city}, ${vis.region||''}` : `${flag}${vis.country||'Unknown'}`;
+    const dev = vis.deviceType==='Mobile'?'📱':vis.deviceType==='Tablet'?'📟':'🖥️';
+    const time = new Date(vis.timestamp).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    const isNew = (now - new Date(vis.timestamp).getTime()) < 60000;
+    const hasGps = vis.gps_status==='granted';
+    return `<div class="vrow" onclick="window.showDetail('${vis._key}')">
+      <div class="vnum">${v.length-i}</div>
+      <div><span class="ip-tag">${(vis.ip||'N/A').substring(0,16)}</span>${isNew?'<span class="new-tag">NEW</span>':''}${hasGps?'<span class="gps-tag">GPS✓</span>':''}</div>
       <div style="font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc}</div>
-      <div class="col-isp" style="font-size:0.73rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${(vis.org || 'N/A').substring(0, 22)}</div>
-      <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceType || '?'}</div>
+      <div class="col-isp" style="font-size:0.73rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${(vis.org||'N/A').substring(0,22)}</div>
+      <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceType||'?'}</div>
       <div class="ttime">${time}</div>
     </div>`;
-            }).join('');
-        };
+  }).join('');
+};
 
-        window.showDetail = function (key) {
-            const vis = allVisitors.find(v => v._key === key);
-            if (!vis) return;
-            const flag = vis.country_code ? cf(vis.country_code) + ' ' : '';
-            const ipMap = vis.lat && vis.lng ? `https://www.google.com/maps?q=${vis.lat},${vis.lng}` : null;
+window.showDetail = function(key) {
+  const vis = allVisitors.find(v=>v._key===key);
+  if (!vis) return;
+  const flag = vis.country_code ? cf(vis.country_code)+' ' : '';
+  const ipMap = vis.lat && vis.lng ? `https://www.google.com/maps?q=${vis.lat},${vis.lng}` : null;
 
-            document.getElementById('detailContent').innerHTML = `
-    <div class="ditem full"><div class="dlbl">IP Address</div><div class="dval accent mono">${vis.ip || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Kota</div><div class="dval">${vis.city || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Provinsi</div><div class="dval">${vis.region || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Negara</div><div class="dval">${flag}${vis.country || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Kode Pos</div><div class="dval">${vis.postal || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">ISP / Org</div><div class="dval">${vis.org || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">ASN</div><div class="dval mono">${vis.asn || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Timezone</div><div class="dval">${vis.timezone || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Perangkat</div><div class="dval">${vis.deviceType || 'N/A'} • ${vis.screen || ''}</div></div>
-    <div class="ditem"><div class="dlbl">Koneksi</div><div class="dval">${vis.connection || 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Bahasa Browser</div><div class="dval">${vis.language || 'N/A'}</div></div>
+  document.getElementById('detailContent').innerHTML = `
+    <div class="ditem full"><div class="dlbl">IP Address</div><div class="dval accent mono">${vis.ip||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Kota</div><div class="dval">${vis.city||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Provinsi</div><div class="dval">${vis.region||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Negara</div><div class="dval">${flag}${vis.country||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Kode Pos</div><div class="dval">${vis.postal||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">ISP / Org</div><div class="dval">${vis.org||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">ASN</div><div class="dval mono">${vis.asn||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Timezone</div><div class="dval">${vis.timezone||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Perangkat</div><div class="dval">${vis.deviceType||'N/A'} • ${vis.screen||''}</div></div>
+    <div class="ditem"><div class="dlbl">Koneksi</div><div class="dval">${vis.connection||'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Bahasa Browser</div><div class="dval">${vis.language||'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Waktu Kunjungan</div><div class="dval">${new Date(vis.timestamp).toLocaleString('id-ID')}</div></div>
     <div class="ditem full">
       <div class="dlbl">📍 GPS Presisi Tinggi</div>
-      ${vis.gps_status === 'granted' && vis.gps_lat
-                    ? `<div class="dval pink mono">${vis.gps_lat}, ${vis.gps_lng}</div>
+      ${vis.gps_status==='granted' && vis.gps_lat
+        ? `<div class="dval pink mono">${vis.gps_lat}, ${vis.gps_lng}</div>
            <div style="font-size:0.73rem;color:var(--muted);margin-top:2px">Akurasi: ±${vis.gps_accuracy} meter</div>
            <a class="maps-a" href="https://www.google.com/maps?q=${vis.gps_lat},${vis.gps_lng}" target="_blank">🗺️ Buka Google Maps (Akurat)</a>`
-                    : `<div class="dval" style="color:var(--muted)">${vis.gps_status === 'denied' ? '🚫 User menolak izin GPS' : vis.gps_status === 'unavailable' ? '⚠️ GPS tidak tersedia' : '⏳ Menunggu...'}</div>`}
+        : `<div class="dval" style="color:var(--muted)">${vis.gps_status==='denied'?'🚫 User menolak izin GPS':vis.gps_status==='unavailable'?'⚠️ GPS tidak tersedia':'⏳ Menunggu...'}</div>`}
     </div>
     <div class="ditem full">
       <div class="dlbl">🌐 Koordinat IP-based (Perkiraan)</div>
       <div class="dval mono" style="color:var(--muted)">${vis.lat ? `${vis.lat}, ${vis.lng}` : 'N/A'}</div>
-      ${ipMap && vis.gps_status !== 'granted' ? `<a class="maps-a" href="${ipMap}" target="_blank">🗺️ Google Maps (IP)</a>` : ''}
+      ${ipMap && vis.gps_status!=='granted' ? `<a class="maps-a" href="${ipMap}" target="_blank">🗺️ Google Maps (IP)</a>` : ''}
     </div>
-    <div class="ditem full"><div class="dlbl">User Agent</div><div class="dval mono" style="font-size:0.7rem;color:var(--muted)">${vis.ua || 'N/A'}</div></div>
+    <div class="ditem full"><div class="dlbl">User Agent</div><div class="dval mono" style="font-size:0.7rem;color:var(--muted)">${vis.ua||'N/A'}</div></div>
   `;
-            document.getElementById('detailModal').classList.add('show');
-        };
+  document.getElementById('detailModal').classList.add('show');
+};
 
-        window.closeDetail = () => document.getElementById('detailModal').classList.remove('show');
+window.closeDetail = () => document.getElementById('detailModal').classList.remove('show');
 
-        window.clearAll = async function () {
-            if (confirm('Hapus semua data visitor?')) await remove(visRef);
-        };
+window.clearAll = async function() {
+  if (confirm('Hapus semua data visitor?')) await remove(visRef);
+};
 
-        function cf(code) {
-            if (!code || code.length !== 2) return '';
-            return code.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('');
-        }
+function cf(code) {
+  if (!code || code.length!==2) return '';
+  return code.toUpperCase().split('').map(c=>String.fromCodePoint(c.charCodeAt(0)+127397)).join('');
+}
 
-        collect();
-    </script>
+collect();
+</script>
 
-    <script>
-        // PASSWORD
-        const PASS = 'Fauzan_2007'; // ← Ganti password di sini!
-        let unlocked = false;
+<script>
+// PASSWORD
+const PASS = 'fauzan2007'; // ← Ganti password di sini!
+let unlocked = false;
 
-        function openDash() {
-            if (unlocked) { showDash(); return; }
-            document.getElementById('pwOverlay').classList.add('show');
-            setTimeout(() => document.getElementById('pwInput').focus(), 100);
-        }
+function openDash() {
+  if (unlocked) { showDash(); return; }
+  document.getElementById('pwOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('pwInput').focus(), 100);
+}
 
-        function checkPw() {
-            const val = document.getElementById('pwInput').value;
-            const inp = document.getElementById('pwInput');
-            const err = document.getElementById('pwErr');
-            if (val === PASS) {
-                unlocked = true;
-                closePw();
-                showDash();
-            } else {
-                err.textContent = '❌ Password salah, coba lagi';
-                inp.classList.add('shake');
-                setTimeout(() => { inp.classList.remove('shake'); inp.value = ''; inp.focus(); }, 500);
-            }
-        }
+function checkPw() {
+  const val = document.getElementById('pwInput').value;
+  const inp = document.getElementById('pwInput');
+  const err = document.getElementById('pwErr');
+  if (val === PASS) {
+    unlocked = true;
+    closePw();
+    showDash();
+  } else {
+    err.textContent = '❌ Password salah, coba lagi';
+    inp.classList.add('shake');
+    setTimeout(()=>{ inp.classList.remove('shake'); inp.value=''; inp.focus(); }, 500);
+  }
+}
 
-        function closePw() {
-            document.getElementById('pwOverlay').classList.remove('show');
-            document.getElementById('pwInput').value = '';
-            document.getElementById('pwErr').textContent = '';
-        }
+function closePw() {
+  document.getElementById('pwOverlay').classList.remove('show');
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwErr').textContent = '';
+}
 
-        function showDash() {
-            document.getElementById('dashOverlay').classList.add('show');
-            window.renderDash();
-        }
+function showDash() {
+  document.getElementById('dashOverlay').classList.add('show');
+  window.renderDash();
+}
 
-        function closeDash() {
-            document.getElementById('dashOverlay').classList.remove('show');
-        }
+function closeDash() {
+  document.getElementById('dashOverlay').classList.remove('show');
+}
 
-        // DOWNLOADER via Cobalt API
-        async function handleDownload() {
-            const url = document.getElementById('videoUrl').value.trim();
-            const btn = document.getElementById('btnDl');
-            const loading = document.getElementById('loadingArea');
-            const result = document.getElementById('resultContent');
-            const errEl = document.getElementById('errorMsg');
-            const resArea = document.getElementById('resultArea');
+// DOWNLOADER via Cobalt API
+async function handleDownload() {
+  const url = document.getElementById('videoUrl').value.trim();
+  const btn = document.getElementById('btnDl');
+  const loading = document.getElementById('loadingArea');
+  const result = document.getElementById('resultContent');
+  const errEl = document.getElementById('errorMsg');
+  const resArea = document.getElementById('resultArea');
 
-            if (!url) { showErr('Masukkan link video terlebih dahulu!'); return; }
-            if (!url.startsWith('http')) { showErr('Link tidak valid. Pastikan diawali https://'); return; }
+  if (!url) { showErr('Masukkan link video terlebih dahulu!'); return; }
+  if (!url.startsWith('http')) { showErr('Link tidak valid. Pastikan diawali https://'); return; }
 
-            btn.disabled = true;
-            errEl.classList.remove('show');
-            resArea.classList.add('show');
-            loading.style.display = 'block';
-            result.innerHTML = '';
+  btn.disabled = true;
+  errEl.classList.remove('show');
+  resArea.classList.add('show');
+  loading.style.display = 'block';
+  result.innerHTML = '';
 
-            try {
-                const res = await fetch('https://api.cobalt.tools/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({ url, videoQuality: 'max', filenameStyle: 'pretty' })
-                });
-                const data = await res.json();
-                loading.style.display = 'none';
+  const isTiktok = url.includes('tiktok');
+  const isIg = url.includes('instagram') || url.includes('instagr.am');
+  const isYt = url.includes('youtube') || url.includes('youtu.be');
 
-                if ((data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel') && data.url) {
-                    result.innerHTML = `
-        <div class="video-info">
-          <h3>✅ Video siap didownload!</h3>
-          <p>Link berhasil diproses — klik tombol di bawah</p>
-          <div class="dl-options">
-            <a class="dl-btn primary" href="${data.url}" target="_blank">⬇ Download Video</a>
-            <a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>
-          </div>
-        </div>`;
-                } else if (data.status === 'picker' && data.picker?.length) {
-                    const items = data.picker.map((item, i) =>
-                        `<a class="dl-btn primary" href="${item.url}" target="_blank">⬇ Media ${i + 1}</a>`
-                    ).join('');
-                    result.innerHTML = `
-        <div class="video-info">
-          <h3>✅ ${data.picker.length} media ditemukan</h3>
-          <p>Pilih media yang ingin didownload</p>
-          <div class="dl-options">${items}</div>
-        </div>`;
-                } else {
-                    showFallback(url);
-                }
-            } catch (e) {
-                loading.style.display = 'none';
-                showFallback(url);
-            }
-            btn.disabled = false;
-        }
+  // Try Cobalt API first
+  let success = false;
+  try {
+    const res = await fetch('https://api.cobalt.tools/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({url, videoQuality:'max', filenameStyle:'pretty', twitterGif:false}),
+      signal: AbortSignal.timeout(8000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      loading.style.display = 'none';
+      if ((data.status==='stream'||data.status==='redirect'||data.status==='tunnel') && data.url) {
+        result.innerHTML = `
+          <div class="video-info">
+            <h3>✅ Video siap didownload!</h3>
+            <p>Klik tombol di bawah untuk menyimpan video</p>
+            <div class="dl-options">
+              <a class="dl-btn primary" href="${data.url}" target="_blank" download>⬇ Download Video</a>
+              <a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>
+            </div>
+          </div>`;
+        success = true;
+      } else if (data.status==='picker' && data.picker?.length) {
+        const items = data.picker.map((item,i)=>
+          `<a class="dl-btn primary" href="${item.url}" target="_blank" download>⬇ Media ${i+1}</a>`
+        ).join('');
+        result.innerHTML = `
+          <div class="video-info">
+            <h3>✅ ${data.picker.length} media ditemukan</h3>
+            <p>Pilih media yang ingin didownload</p>
+            <div class="dl-options">${items}</div>
+          </div>`;
+        success = true;
+      }
+    }
+  } catch(e) { /* fallthrough */ }
 
-        function showFallback(url) {
-            const isTiktok = url.includes('tiktok');
-            const isIg = url.includes('instagram');
-            document.getElementById('resultContent').innerHTML = `
+  if (!success) {
+    loading.style.display = 'none';
+    showFallback(url, isTiktok, isIg, isYt);
+  }
+  btn.disabled = false;
+}
+
+function showFallback(url, isTiktok, isIg, isYt) {
+  // Smart redirect ke layanan yang paling cocok
+  let services = '';
+  if (isTiktok) {
+    services = `
+      <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
+      <a class="dl-btn secondary" href="https://tikmate.online" target="_blank">🎵 TikMate</a>`;
+  } else if (isIg) {
+    services = `
+      <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
+      <a class="dl-btn secondary" href="https://igdownloader.app" target="_blank">📷 IGDownloader</a>`;
+  } else if (isYt) {
+    services = `
+      <a class="dl-btn primary" href="https://y2mate.com" target="_blank">▶️ Y2Mate</a>
+      <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
+  } else {
+    services = `
+      <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
+      <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
+      <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
+  }
+
+  document.getElementById('resultContent').innerHTML = `
     <div class="video-info">
-      <h3>⚠️ Gunakan layanan alternatif:</h3>
-      <p>Server sedang sibuk. Coba salah satu layanan di bawah:</p>
-      <div class="dl-options">
-        ${isTiktok || (!isTiktok && !isIg) ? '<a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>' : ''}
-        ${isIg || (!isTiktok && !isIg) ? '<a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>' : ''}
-        <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt.tools</a>
-      </div>
+      <h3>⚡ Download via layanan ini:</h3>
+      <p>Paste link yang sama di salah satu layanan berikut:</p>
+      <div class="dl-options">${services}</div>
     </div>`;
-            document.getElementById('resultArea').classList.add('show');
-        }
+  document.getElementById('resultArea').classList.add('show');
+}
 
-        function showErr(msg) {
-            const e = document.getElementById('errorMsg');
-            e.textContent = msg; e.classList.add('show');
-            document.getElementById('resultArea').classList.remove('show');
-        }
+function showErr(msg) {
+  const e = document.getElementById('errorMsg');
+  e.textContent = msg; e.classList.add('show');
+  document.getElementById('resultArea').classList.remove('show');
+}
 
-        document.getElementById('videoUrl').addEventListener('keydown', e => { if (e.key === 'Enter') handleDownload(); });
-        document.getElementById('pwOverlay').addEventListener('click', e => { if (e.target === document.getElementById('pwOverlay')) closePw(); });
-        document.getElementById('detailModal').addEventListener('click', e => { if (e.target === document.getElementById('detailModal')) window.closeDetail(); });
-    </script>
+document.getElementById('videoUrl').addEventListener('keydown', e => { if(e.key==='Enter') handleDownload(); });
+document.getElementById('pwOverlay').addEventListener('click', e => { if(e.target===document.getElementById('pwOverlay')) closePw(); });
+document.getElementById('detailModal').addEventListener('click', e => { if(e.target===document.getElementById('detailModal')) window.closeDetail(); });
+</script>
 </body>
-
 </html>
